@@ -46,7 +46,7 @@ int main( int argc, char** argv ){
     //Mat
 
     Mat image = imread(argv[1], IMREAD_GRAYSCALE);
-    
+
     if( image.empty() ){
         cout <<  "Could not open or find the image" << std::endl ;
         return -1;
