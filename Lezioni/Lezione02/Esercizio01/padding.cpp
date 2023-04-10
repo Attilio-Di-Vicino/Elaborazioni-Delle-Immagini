@@ -6,9 +6,9 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // g++ padding.cpp -o padding $(pkg-config --cflags --libs opencv)
-// ./padding opencv-logo.png
 // ./padding giacinto.jpg
 
 #include <iostream>
@@ -19,25 +19,9 @@ using namespace cv;
 using namespace std;
 //! [namespace]
 
-Vec2b sum8( Mat image, int i, int j ) {
-    Vec2b sum = 0;
-    sum +=  image.at<Vec2b>( i - 0, j - 0 ) +
-            image.at<Vec2b>( i - 1, j - 1 ) +
-            image.at<Vec2b>( i - 1, j - 0 ) +
-            image.at<Vec2b>( i - 1, j + 1 ) +
-            image.at<Vec2b>( i - 0, j - 1 ) +
-            image.at<Vec2b>( i - 0, j + 1 ) +
-            image.at<Vec2b>( i + 1, j - 1 ) +
-            image.at<Vec2b>( i + 1, j - 0 ) +
-            image.at<Vec2b>( i + 1, j + 1 );
-    
-    // cout << " Sum[" << i << "]: " << sum << endl;
-    //Vec2b result = Vec2b( sum[0]%255, sum[1]%255 );
-    //return result;
-    // return sum;
-    return sum;
-}
-
+uchar sum8( Mat , int, int, int );
+Mat padding( Mat, int, int, int, int );
+Mat myBlur( Mat, Mat );
 int main( int argc, char** argv )
 {
     //! [load]
@@ -62,198 +46,105 @@ int main( int argc, char** argv )
         return -1;
     }
 
-    //! [window]
-    namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
-    //! [window]
-
-    //! [imshow]
-    imshow( "Display window", image );                // Show our image inside it.
-    //! [imshow]
-
-    //! [wait]
-    waitKey(0); // Wait for a keystroke in the window
-    //! [wait]
-
-    //Utility
-    Mat imageC;
-
-    /**
-     * 255 padding bianco
-     * La funzione "create" della classe "Mat" di OpenCV viene utilizzata per creare la nuova immagine "imageC".
-     * I parametri passati alla funzione sono le dimensioni dell'immagine, che sono le dimensioni dell'immagine
-     * originale aumentate di due pixel su ogni lato e il tipo di immagine, che viene copiato dall'immagine originale.
-     * 
-     * Successivamente, la funzione "setTo" viene utilizzata per impostare tutti i pixel dell'immagine "imageC"
-     * sul valore di colore bianco (255,255,255).
-     * 
-     * Infine, viene utilizzato un doppio ciclo "for" per copiare i pixel dell'immagine "image" nell'immagine "imageC"
-     * spostando ciascun pixel dell'immagine originale di una posizione verso destra e verso il basso, in modo da centrare
-     * l'immagine originale all'interno dell'immagine più grande. Il valore del pixel dell'immagine originale viene quindi
-     * copiato nella posizione corrispondente nell'immagine "imageC".
-    */
-    int top = 1;
-    int bottom = 1;
-    int left = 1;
-    int right = 1;
-
-    imageC.create( image.rows + top + bottom, image.cols + left + right, image.type() );
-    imageC.setTo( cv::Scalar( 255, 255 ) );
-    for ( int i = 0; i < image.rows; i++ ) {
-        for ( int j = 0; j < image.cols; j++ ) {
-            imageC.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
-        }
-    }
-
-    cout << "padding bianco 1px" << endl;
-    imshow( "Display window", imageC);
+    namedWindow( "Display window", WINDOW_AUTOSIZE );
+    imshow( "Display window", image );
     waitKey(0);
 
-    /**
-    * padding nero 50px
-    */
+    Mat paddedImage = padding( image, 1, 1, 1, 1 );
+    Mat blurredImage = myBlur( image, paddedImage );
 
-    top = 50;
-    bottom = 50;
-    left = 50;
-    right = 50;
-    
-    imageC.create( image.rows + top + bottom, image.cols + left + right, image.type() );
-    // imageC.setTo( cv::Scalar( 0, 0 ) );
-    for ( int i = 0; i < image.rows; i++ ) {
-        for ( int j = 0; j < image.cols; j++ ) {
-            imageC.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
-        }
-    }
+    Mat prova;
+    blur( image, prova, Size( 10, 10 ) );
 
-    for ( int i = 0; i < top; i++  ) {
-        for ( int j = 0; j < imageC.cols; j++ ) {
-            imageC.at<Vec2b>( i, j ) = Vec2b( 0, 0);
-            // imageC.at<Vec2b>( imageC.rows - i - 1, j ) = Vec2b( 0, 0 );
-        }
-    }
-
-
-    for ( int j = 0; j < left; j++  ) {
-        for ( int i = 0; i < imageC.rows; i++ ) {
-            imageC.at<Vec2b>( i, j ) = Vec2b( 0, 0 );
-            imageC.at<Vec2b>( i, imageC.cols - j - 1 ) = Vec2b( 0, 0 );
-        }
-    }
-
-    cout << "padding nero 50px" << endl;
-    imshow( "Display window", imageC);
+    namedWindow( "paddedImage", WINDOW_AUTOSIZE );
+    imshow( "paddedImage", paddedImage );
     waitKey(0);
 
-    /**
-    * padding speculare 50px
-    */
+    namedWindow( "myBlurredImage", WINDOW_AUTOSIZE );
+    imshow( "myBlurredImage", blurredImage );
+    waitKey(0);
 
-    top = 50;
-    bottom = 50;
-    left = 50;
-    right = 50;
+    namedWindow( "blur", WINDOW_AUTOSIZE );
+    imshow( "blur", prova );
+    waitKey(0);
+}
+
+Mat myBlur( Mat image, Mat paddedImage ) { 
+
+    for ( int i = 0; i < image.rows; i++ )
+        for( int j = 0; j < image.cols; j++ ) {
+            image.at<Vec2b>(i, j)[0] = sum8( paddedImage , i + 1, j + 1, 0 );
+            image.at<Vec2b>(i, j)[1] = sum8( paddedImage , i + 1, j + 1, 1 );
+        }
+    return image;
+}
+
+uchar sum8( Mat image, int i, int j, int p ) {
+
+    return  ( image.at<Vec2b>( i - 0, j - 0 )[p] +
+              image.at<Vec2b>( i - 1, j - 1 )[p] +
+              image.at<Vec2b>( i - 1, j - 0 )[p] +
+              image.at<Vec2b>( i - 1, j + 1 )[p] +
+              image.at<Vec2b>( i - 0, j - 1 )[p] +
+              image.at<Vec2b>( i - 0, j + 1 )[p] +
+              image.at<Vec2b>( i + 1, j - 1 )[p] +
+              image.at<Vec2b>( i + 1, j - 0 )[p] +
+              image.at<Vec2b>( i + 1, j + 1 )[p] ) / 9;
+}
+
+Mat padding( Mat image, int top, int bottom, int left, int right ) { 
+
+    Mat paddedImage( image.rows + top + bottom, image.cols + left + right, image.type(), Scalar( 0, 0 ) );
     
-    imageC.create( image.rows + top + bottom, image.cols + left + right, image.type() );
     for ( int i = 0; i < image.rows; i++ ) {
         for ( int j = 0; j < image.cols; j++ ) {
-            imageC.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
+            paddedImage.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
         }
-
     }
 
     int index = 0;
     for ( int i = 0; i < top; i++  ) {
-        for ( int j = 0; j < imageC.cols; j++ ) {
+        for ( int j = 0; j < paddedImage.cols; j++ ) {
             if ( j < image.cols )
                 index = j;
             else
                 index = image.cols - 1;
-            imageC.at<Vec2b>(i, j) = image.at<Vec2b>(i, index);
-            //imageC.at<Vec2b>(imageC.rows - i - 1, j) = image.at<Vec2b>(image.rows - i - 1, index);
+            paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( i, index );
+        }
+    }
+
+    index = 0;
+    for ( int i = 0; i < bottom; i++  ) {
+        for ( int j = 0; j < paddedImage.cols; j++ ) {
+            if ( j < image.cols )
+                index = j;
+            else
+                index = image.cols - 1;
+            paddedImage.at<Vec2b>( paddedImage.rows - i - 2, j ) = image.at<Vec2b>( image.rows - i - 2, index ); // da capire il - 2
         }
     }
 
     index = 0;
     for ( int j = 0; j < left; j++  ) {
-        for ( int i = 0; i < imageC.rows; i++ ) {
+        for ( int i = 0; i < paddedImage.rows; i++ ) {
             if ( i < image.rows )
                 index = i;
             else 
                 index = image.rows - 1;
-            imageC.at<Vec2b>( i, j ) = image.at<Vec2b>( index, j );
-            imageC.at<Vec2b>( i, imageC.cols - j - 1 ) = image.at<Vec2b>( index, image.cols - j - 1 );
-        }
-    }
-
-    cout << "padding speculare 50px" << endl;
-    imshow( "Display window", imageC);
-    waitKey(0);
-
-
-    /**
-    * padding speculare 1px
-    * per effettuare somma di 8px
-    */
-
-    top = 1;
-    bottom = 1;
-    left = 1;
-    right = 1;
-    
-    imageC.create( image.rows + top + bottom, image.cols + left + right, image.type() );
-    for ( int i = 0; i < image.rows; i++ ) {
-        for ( int j = 0; j < image.cols; j++ ) {
-            imageC.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
-        }
-
-    }
-
-    index = 0;
-    for ( int i = 0; i < top; i++  ) {
-        for ( int j = 0; j < imageC.cols; j++ ) {
-            if ( j < image.cols )
-                index = j;
-            else
-                index = image.cols - 1;
-            imageC.at<Vec2b>(i, j) = image.at<Vec2b>(i, index);
-            //imageC.at<Vec2b>(imageC.rows - i - 1, j) = image.at<Vec2b>(image.rows - i - 1, index);
+            paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( index, j );
         }
     }
 
     index = 0;
-    for ( int j = 0; j < left; j++  ) {
-        for ( int i = 0; i < imageC.rows; i++ ) {
+    for ( int j = 0; j < right; j++  ) {
+        for ( int i = 0; i < paddedImage.rows; i++ ) {
             if ( i < image.rows )
                 index = i;
             else 
-                index = image.rows - 1;
-            imageC.at<Vec2b>( i, j ) = image.at<Vec2b>( index, j );
-            imageC.at<Vec2b>( i, imageC.cols - j - 1 ) = image.at<Vec2b>( index, image.cols - j - 1 );
+                index = image.rows - 10; // l' ultimo pixel è nero quindi prendo l'ultimo pixel - 10
+            paddedImage.at<Vec2b>( i, paddedImage.cols - j - 1 ) = image.at<Vec2b>( index, image.cols - j - 1 );
         }
     }
 
-    cout << "padding speculare 1px per effettuare somma di 8" << endl;
-    imshow( "Display window", imageC);
-    waitKey(0);
-    
-    Mat imageResult;
-    imageResult.create( image.rows, image.cols, image.type() );
-    //imageResult.setTo( cv::Scalar( 0, 0 ) );
-
-    cout << "Image Result before" << endl;
-    imshow( "Display window", imageResult);
-    waitKey(0);
-
-    for ( int i = 0; i < imageResult.rows - 1; i++ ) {
-        for ( int j = 0; j < imageResult.cols - 1; j++ ) {
-            // imageResult.at<Vec2b>( i, j ) = Vec2b( 255, 255 );
-            imageResult.at<Vec2b>( i, j ) = sum8( imageC, i+1, j+1 );
-        }
-    }
-
-    cout << "somma di 8" << endl;
-    imshow( "Display window", imageResult);
-    waitKey(0);
-
-    return 0;
+    return paddedImage;
 }
