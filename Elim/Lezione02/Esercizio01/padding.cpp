@@ -7,6 +7,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "../../Algorithm/MyPadding.h"
 
 // g++ padding.cpp -o padding $(pkg-config --cflags --libs opencv)
 // ./padding giacinto.jpg
@@ -20,7 +21,6 @@ using namespace std;
 //! [namespace]
 
 uchar sum8( Mat , int, int, int );
-Mat padding( Mat, int, int, int, int );
 Mat myBlur( Mat, Mat );
 int main( int argc, char** argv )
 {
@@ -48,24 +48,38 @@ int main( int argc, char** argv )
 
     namedWindow( "Display window", WINDOW_AUTOSIZE );
     imshow( "Display window", image );
-    waitKey(0);
+    waitKey( 0 );
 
-    Mat paddedImage = padding( image, 1, 1, 1, 1 );
-    Mat blurredImage = myBlur( image, paddedImage );
+    Mat paddedTest;
+    MyPadding<Vec2b>::padding( image, paddedTest, 20, MyBorderType::BORDER_CONSTANT, Scalar( 200, 200 ) );
 
-    Mat prova;
-    blur( image, prova, Size( 10, 10 ) );
+    imshow( "paddedTest", paddedTest );
+    waitKey( 0 );
 
-    namedWindow( "paddedImage", WINDOW_AUTOSIZE );
-    imshow( "paddedImage", paddedImage );
-    waitKey(0);
 
-    namedWindow( "myBlurredImage", WINDOW_AUTOSIZE );
-    imshow( "myBlurredImage", blurredImage );
-    waitKey(0);
+    Mat paddedTest2;
+    MyPadding<Vec2b>::padding( image, paddedTest2, 100, MyBorderType::BORDER_WRAP );
 
-    namedWindow( "blur", WINDOW_AUTOSIZE );
-    imshow( "blur", prova );
+    imshow( "paddedTest2", paddedTest2 );
+    waitKey( 0 );
+
+    Mat paddedTest3;
+    copyMakeBorder( image, paddedTest3, 100, 100, 100, 100 , BORDER_WRAP);
+
+    imshow( "paddedTest3", paddedTest3 );
+    waitKey( 0 );
+
+    Mat paddedTestForBlur;
+    MyPadding<Vec2b>::padding( image, paddedTestForBlur, 1, MyBorderType::BORDER_WRAP );
+    Mat blurredImage = myBlur( image, paddedTestForBlur );
+
+    imshow( "blurredImage", blurredImage );
+    waitKey( 0 );
+
+    Mat blurDefault;
+    blur( image, blurDefault, Size( 3, 3 ) );
+
+    imshow( "blurDefault", blurDefault );
     waitKey(0);
 }
 
@@ -92,59 +106,59 @@ uchar sum8( Mat image, int i, int j, int p ) {
               image.at<Vec2b>( i + 1, j + 1 )[p] ) / 9;
 }
 
-Mat padding( Mat image, int top, int bottom, int left, int right ) { 
+// Mat padding( Mat image, int top, int bottom, int left, int right ) { 
 
-    Mat paddedImage( image.rows + top + bottom, image.cols + left + right, image.type(), Scalar( 0, 0 ) );
+//     Mat paddedImage( image.rows + top + bottom, image.cols + left + right, image.type(), Scalar( 0, 0 ) );
     
-    for ( int i = 0; i < image.rows; i++ ) {
-        for ( int j = 0; j < image.cols; j++ ) {
-            paddedImage.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
-        }
-    }
+//     for ( int i = 0; i < image.rows; i++ ) {
+//         for ( int j = 0; j < image.cols; j++ ) {
+//             paddedImage.at<cv::Vec2b>( i + bottom, j + right ) = image.at<cv::Vec2b>( i, j );
+//         }
+//     }
 
-    int index = 0;
-    for ( int i = 0; i < top; i++  ) {
-        for ( int j = 0; j < paddedImage.cols; j++ ) {
-            if ( j < image.cols )
-                index = j;
-            else
-                index = image.cols - 1;
-            paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( i, index );
-        }
-    }
+//     int index = 0;
+//     for ( int i = 0; i < top; i++  ) {
+//         for ( int j = 0; j < paddedImage.cols; j++ ) {
+//             if ( j < image.cols )
+//                 index = j;
+//             else
+//                 index = image.cols - 1;
+//             paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( i, index );
+//         }
+//     }
 
-    index = 0;
-    for ( int i = 0; i < bottom; i++  ) {
-        for ( int j = 0; j < paddedImage.cols; j++ ) {
-            if ( j < image.cols )
-                index = j;
-            else
-                index = image.cols - 1;
-            paddedImage.at<Vec2b>( paddedImage.rows - i - 2, j ) = image.at<Vec2b>( image.rows - i - 2, index ); // da capire il - 2
-        }
-    }
+//     index = 0;
+//     for ( int i = 0; i < bottom; i++  ) {
+//         for ( int j = 0; j < paddedImage.cols; j++ ) {
+//             if ( j < image.cols )
+//                 index = j;
+//             else
+//                 index = image.cols - 1;
+//             paddedImage.at<Vec2b>( paddedImage.rows - i - 2, j ) = image.at<Vec2b>( image.rows - i - 2, index ); // da capire il - 2
+//         }
+//     }
 
-    index = 0;
-    for ( int j = 0; j < left; j++  ) {
-        for ( int i = 0; i < paddedImage.rows; i++ ) {
-            if ( i < image.rows )
-                index = i;
-            else 
-                index = image.rows - 1;
-            paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( index, j );
-        }
-    }
+//     index = 0;
+//     for ( int j = 0; j < left; j++  ) {
+//         for ( int i = 0; i < paddedImage.rows; i++ ) {
+//             if ( i < image.rows )
+//                 index = i;
+//             else 
+//                 index = image.rows - 1;
+//             paddedImage.at<Vec2b>( i, j ) = image.at<Vec2b>( index, j );
+//         }
+//     }
 
-    index = 0;
-    for ( int j = 0; j < right; j++  ) {
-        for ( int i = 0; i < paddedImage.rows; i++ ) {
-            if ( i < image.rows )
-                index = i;
-            else 
-                index = image.rows - 10; // l' ultimo pixel è nero quindi prendo l'ultimo pixel - 10
-            paddedImage.at<Vec2b>( i, paddedImage.cols - j - 1 ) = image.at<Vec2b>( index, image.cols - j - 1 );
-        }
-    }
+//     index = 0;
+//     for ( int j = 0; j < right; j++  ) {
+//         for ( int i = 0; i < paddedImage.rows; i++ ) {
+//             if ( i < image.rows )
+//                 index = i;
+//             else 
+//                 index = image.rows - 10; // l' ultimo pixel è nero quindi prendo l'ultimo pixel - 10
+//             paddedImage.at<Vec2b>( i, paddedImage.cols - j - 1 ) = image.at<Vec2b>( index, image.cols - j - 1 );
+//         }
+//     }
 
-    return paddedImage;
-}
+//     return paddedImage;
+// }
