@@ -64,7 +64,7 @@ int main( int argc, char** argv )
     waitKey( 0 );
 
     Mat paddedTest3;
-    copyMakeBorder( image, paddedTest3, 100, 100, 100, 100 , BORDER_WRAP);
+    copyMakeBorder( image, paddedTest3, 100, 100, 100, 100 , BORDER_WRAP );
 
     imshow( "paddedTest3", paddedTest3 );
     waitKey( 0 );
