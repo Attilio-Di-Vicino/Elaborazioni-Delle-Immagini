@@ -21,7 +21,7 @@ using namespace std;
 //! [namespace]
 
 uchar sum8( Mat , int, int, int );
-Mat myBlur( Mat, Mat );
+Mat myBlur( Mat, int );
 int main( int argc, char** argv )
 {
     //! [load]
@@ -40,7 +40,7 @@ int main( int argc, char** argv )
     image = imread( samples::findFile( imageName ), IMREAD_GRAYSCALE ); // Read the file
     //! [imread]
 
-    if( image.empty() )                      // Check for invalid input
+    if( image.empty() ) // Check for invalid input
     {
         cout <<  "Could not open or find the image" << std::endl ;
         return -1;
@@ -69,39 +69,54 @@ int main( int argc, char** argv )
     imshow( "paddedTest3", paddedTest3 );
     waitKey( 0 );
 
-    Mat paddedTestForBlur;
-    MyPadding<Vec2b>::padding( image, paddedTestForBlur, 1, MyBorderType::BORDER_WRAP );
-    Mat blurredImage = myBlur( image, paddedTestForBlur );
+    Mat blurredImage = myBlur( image, 57 );
 
     imshow( "blurredImage", blurredImage );
     waitKey( 0 );
 
     Mat blurDefault;
-    blur( image, blurDefault, Size( 3, 3 ) );
+    blur( image, blurDefault, Size( 23, 23 ) );
 
     imshow( "blurDefault", blurDefault );
     waitKey(0);
 }
 
-Mat myBlur( Mat image, Mat paddedImage ) { 
+Mat myBlur( Mat imageA, int kernelSize ) { 
+
+    Mat image( imageA );
+
+    // se è pari trasformalo a dispari
+    if ( ( kernelSize % 2 ) == 0 )
+        kernelSize++;
+
+    int paddingSize = kernelSize / 2;
+
+    Mat paddedImage;
+    MyPadding<uchar>::padding( image, paddedImage, paddingSize, MyBorderType::BORDER_WRAP );
 
     for ( int i = 0; i < image.rows; i++ )
         for( int j = 0; j < image.cols; j++ ) {
-            image.at<Vec2b>(i, j)[0] = sum8( paddedImage , i + 1, j + 1, 0 );
-            image.at<Vec2b>(i, j)[1] = sum8( paddedImage , i + 1, j + 1, 1 );
+
+            int sum = 0;
+            for( int r = 0; r < kernelSize; r++ )
+                for( int c = 0; c < kernelSize; c++ ) {
+                    sum += paddedImage.at<uchar>( i + r, j + c );
+                }
+            image.at<uchar>( i, j ) = sum / ( kernelSize * kernelSize );
+            // image.at<uchar>(i, j) = sum8( paddedImage , i + 1, j + 1, 0 );
         }
     return image;
 }
 
 uchar sum8( Mat image, int i, int j, int p ) {
 
-    return  ( image.at<Vec2b>( i - 0, j - 0 )[p] +
-              image.at<Vec2b>( i - 1, j - 1 )[p] +
-              image.at<Vec2b>( i - 1, j - 0 )[p] +
-              image.at<Vec2b>( i - 1, j + 1 )[p] +
-              image.at<Vec2b>( i - 0, j - 1 )[p] +
-              image.at<Vec2b>( i - 0, j + 1 )[p] +
-              image.at<Vec2b>( i + 1, j - 1 )[p] +
-              image.at<Vec2b>( i + 1, j - 0 )[p] +
-              image.at<Vec2b>( i + 1, j + 1 )[p] ) / 9;
+    return  ( image.at<uchar>( i - 0, j - 0 ) +
+              image.at<uchar>( i - 1, j - 1 ) +
+              image.at<uchar>( i - 1, j - 0 ) +
+              image.at<uchar>( i - 1, j + 1 ) +
+              image.at<uchar>( i - 0, j - 1 ) +
+              image.at<uchar>( i - 0, j + 1 ) +
+              image.at<uchar>( i + 1, j - 1 ) +
+              image.at<uchar>( i + 1, j - 0 ) +
+              image.at<uchar>( i + 1, j + 1 ) ) / 9;
 }
