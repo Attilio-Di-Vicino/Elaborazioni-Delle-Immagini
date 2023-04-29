@@ -7,7 +7,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "../../Algorithm/MyPadding.h"
+#include "../Algorithm/MyPadding.h"
 
 // g++ padding.cpp -o padding $(pkg-config --cflags --libs opencv)
 // ./padding giacinto.jpg
