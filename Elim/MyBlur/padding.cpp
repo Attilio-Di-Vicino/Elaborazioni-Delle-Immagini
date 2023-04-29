@@ -74,6 +74,14 @@ int main( int argc, char** argv )
     imshow( "blurredImage", blurredImage );
     waitKey( 0 );
 
+    /**
+     * Le operazioni di smoothind di openCV che ci propone sono:
+     * blur() è la funzione di smoothing più “semplice”
+     * boxFilter() è una generalizzazione di blur, in quanto presenta un parametro in più ( ddepth )
+     * GaussianBlur() determina i pesi attraverso una funzione gaussiana ( una campana 3d )
+     * 
+     * In questo caso viene proposto un esempio applicativo di blur()
+    */
     Mat blurDefault;
     blur( image, blurDefault, Size( 23, 23 ) );
 
@@ -81,6 +89,16 @@ int main( int argc, char** argv )
     waitKey(0);
 }
 
+/**
+ * myBlur permette di effettuare il blur su un'immagine
+ * utilizza un kernel il quale sarà indispensabile per effettuare 
+ * la somma e la media nell'intorno preso in input per semplicità
+ * se l'intorno è pari verrà trasformato in dispari per avere un ancor point centrale al kernel
+ * 
+ * @param imageA immagine di default al quale si vuole applicare il blur
+ * @param kernelSize size del kernel
+ * @return immagine con blur effettuato
+*/
 Mat myBlur( Mat imageA, int kernelSize ) { 
 
     Mat image( imageA );
@@ -89,25 +107,29 @@ Mat myBlur( Mat imageA, int kernelSize ) {
     if ( ( kernelSize % 2 ) == 0 )
         kernelSize++;
 
-    int paddingSize = kernelSize / 2;
+    int paddingSize = floor( kernelSize / 2 );
 
     Mat paddedImage;
     MyPadding<uchar>::padding( image, paddedImage, paddingSize, MyBorderType::BORDER_WRAP );
 
     for ( int i = 0; i < image.rows; i++ )
         for( int j = 0; j < image.cols; j++ ) {
-
             int sum = 0;
-            for( int r = 0; r < kernelSize; r++ )
+            for( int r = 0; r < kernelSize; r++ ) // kernel
                 for( int c = 0; c < kernelSize; c++ ) {
+                    // somma nell'intorno
                     sum += paddedImage.at<uchar>( i + r, j + c );
                 }
+            // media della somma e assegnazione all'immagine di ritorno
             image.at<uchar>( i, j ) = sum / ( kernelSize * kernelSize );
-            // image.at<uchar>(i, j) = sum8( paddedImage , i + 1, j + 1, 0 );
         }
     return image;
 }
 
+/**
+ * sum8 è una funzione che esgue la somma in un intorno 3x3 
+ * ed esegue la media del risultato, senza l'utilizzo di un kernel
+*/
 uchar sum8( Mat image, int i, int j, int p ) {
 
     return  ( image.at<uchar>( i - 0, j - 0 ) +

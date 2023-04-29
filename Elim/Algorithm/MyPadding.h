@@ -125,12 +125,26 @@ template <typename T> void MyPadding<T>::noBorder( Mat src, Mat& dst, int top, i
     // DA IMPLEMENTARE
 }
 
+/**
+ * Il padding constant semplicemente si limita a copiare l'immagine originale
+ * in un'immagine dst la quale avrà un numero indefinito in più di pixel
+ * posizionati rispettivamente top, bottom, right, left
+ * il colore di questi pixel aggiuntivi sarà di default è impostato a nero ( 0 )
+ * ma può anche essere customizatto passandoglielo in input
+*/
 template <typename T> void MyPadding<T>::borderConstant( Mat src, Mat& dst, int top, int bottom, int left, int right, const Scalar value ) {
     dst.create( src.rows + top + bottom, src.cols + left + right, src.type() );
     dst.setTo( value );
     src.copyTo( dst( Rect( bottom, right, src.cols, src.rows ) ) );
 }
 
+/**
+ * Il padding border wrap in sostanza vuole simulare una replica infinita dell'immagine
+ * come se alla fine dell'immagine riparta di nuovo la rappresentazione della stessa immagine
+ * quindi di conseguenza avremo sempre un numero indefinito di pixel aggiuntivi
+ * ed avremo poi la replica dell'immagine
+ * es. il top sarà uguale al bottom dell'immagine originale e così via 
+*/
 template <typename T> void MyPadding<T>::borderWrap( Mat src, Mat& dst, int top, int bottom, int left, int right, const Scalar value ) {
     borderConstant( src, dst, top, bottom, left, right, value );
 
