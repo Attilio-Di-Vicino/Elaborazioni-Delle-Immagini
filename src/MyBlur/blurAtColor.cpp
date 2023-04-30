@@ -8,8 +8,9 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "../Algorithm/MyPadding.h"
+#include "../Algorithm/MyBlur.h"
 
-// g++ padding.cpp -o padding $(pkg-config --cflags --libs opencv)
+// g++ blurAtColor.cpp -o padding $(pkg-config --cflags --libs opencv)
 // ./padding giacinto.jpg
 
 #include <iostream>
@@ -22,6 +23,8 @@ using namespace std;
 
 uchar sum8( Mat , int, int, int );
 template<typename T> Mat myBlur( Mat, int );
+template<typename T> Mat myBlurSumOneChannel( Mat, Mat, int, int );
+template<typename T> Mat myBlurSumMoreChannels( Mat, Mat, int, int );
 int main( int argc, char** argv )
 {
     //! [load]
@@ -37,7 +40,7 @@ int main( int argc, char** argv )
     //! [mat]
 
     //! [imread]
-    image = imread( samples::findFile( imageName ), IMREAD_GRAYSCALE ); // Read the file
+    image = imread( samples::findFile( imageName ), IMREAD_COLOR ); // Read the file
     //! [imread]
 
     if( image.empty() ) // Check for invalid input
@@ -50,26 +53,7 @@ int main( int argc, char** argv )
     imshow( "Display window", image );
     waitKey( 0 );
 
-    Mat paddedTest;
-    MyPadding<uchar>::padding( image, paddedTest, 20, MyBorderType::BORDER_CONSTANT, Scalar( 200, 200 ) );
-
-    imshow( "paddedTest", paddedTest );
-    waitKey( 0 );
-
-
-    Mat paddedTest2;
-    MyPadding<uchar>::padding( image, paddedTest2, 100, MyBorderType::BORDER_WRAP );
-
-    imshow( "paddedTest2", paddedTest2 );
-    waitKey( 0 );
-
-    Mat paddedTest3;
-    copyMakeBorder( image, paddedTest3, 100, 100, 100, 100 , BORDER_WRAP );
-
-    imshow( "paddedTest3", paddedTest3 );
-    waitKey( 0 );
-
-    Mat blurredImage = myBlur<uchar>( image, 11 );
+    Mat blurredImage = myBlur<Vec3b>( image, 11 );
 
     imshow( "blurredImage", blurredImage );
     waitKey( 0 );
@@ -112,6 +96,21 @@ template<typename T> Mat myBlur( Mat imageA, int kernelSize ) {
     Mat paddedImage;
     MyPadding<T>::padding( image, paddedImage, paddingSize, MyBorderType::BORDER_WRAP );
 
+    int channels = image.channels();
+
+    if ( channels == 1 ) {
+        return myBlurSumOneChannel<uchar>( image, paddedImage, kernelSize, channels );
+    } else if ( channels == 2 ) {
+        return myBlurSumMoreChannels<Vec2b>( image, paddedImage, kernelSize, channels );
+    } else if ( channels == 3 ) {
+        return myBlurSumMoreChannels<Vec3b>( image, paddedImage, kernelSize, channels );
+    }
+    
+    return image;
+}
+
+template<typename T> Mat myBlurSumOneChannel( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
+
     for ( int i = 0; i < image.rows; i++ )
         for( int j = 0; j < image.cols; j++ ) {
             int sum = 0;
@@ -126,19 +125,29 @@ template<typename T> Mat myBlur( Mat imageA, int kernelSize ) {
     return image;
 }
 
-/**
- * sum8 è una funzione che esgue la somma in un intorno 3x3 
- * ed esegue la media del risultato, senza l'utilizzo di un kernel
-*/
-uchar sum8( Mat image, int i, int j, int p ) {
+template<typename T> Mat myBlurSumMoreChannels( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
 
-    return  ( image.at<uchar>( i - 0, j - 0 ) +
-              image.at<uchar>( i - 1, j - 1 ) +
-              image.at<uchar>( i - 1, j - 0 ) +
-              image.at<uchar>( i - 1, j + 1 ) +
-              image.at<uchar>( i - 0, j - 1 ) +
-              image.at<uchar>( i - 0, j + 1 ) +
-              image.at<uchar>( i + 1, j - 1 ) +
-              image.at<uchar>( i + 1, j - 0 ) +
-              image.at<uchar>( i + 1, j + 1 ) ) / 9;
+    for ( int i = 0; i < image.rows; i++ )
+        for( int j = 0; j < image.cols; j++ ) {
+
+            // dichiaro un array per le somme con size uguale ai rispettivi canali dell'immagine
+            // inizializzo ogni volta le somme
+            int sum[ channels ];
+            for ( int cii = 0; cii < channels; cii++ )
+                sum[ cii ] = 0;
+
+            for( int r = 0; r < kernelSize; r++ ) // kernel
+                for( int c = 0; c < kernelSize; c++ ) {
+                    // somma nell'intorno
+                    for ( int cii = 0; cii < channels; cii++ ) {
+                        sum[ cii ] += paddedImage.at<T>( i + r, j + c )[ cii ];
+                    }
+                }
+            
+            // media della somma e assegnazione all'immagine di ritorno
+            for ( int cii = 0; cii < channels; cii++ ) {
+                image.at<T>( i, j )[ cii ] = sum[ cii ] / ( kernelSize * kernelSize );
+            }
+        }
+    return image;
 }

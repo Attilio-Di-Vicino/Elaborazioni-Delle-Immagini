@@ -144,31 +144,40 @@ template <typename T> void MyPadding<T>::borderConstant( Mat src, Mat& dst, int 
  * quindi di conseguenza avremo sempre un numero indefinito di pixel aggiuntivi
  * ed avremo poi la replica dell'immagine
  * es. il top sarà uguale al bottom dell'immagine originale e così via 
+ * 
+ * @param src immagine al cui applicare il padding
+ * @param dst immagine col padding
+ * @param top padding superiore
+ * @param bottom padding inferiore
+ * @param left padding a sinistra
+ * @param right padding a destra
+ * @param value costante per il padding di default 0
 */
 template <typename T> void MyPadding<T>::borderWrap( Mat src, Mat& dst, int top, int bottom, int left, int right, const Scalar value ) {
     borderConstant( src, dst, top, bottom, left, right, value );
 
     for ( int i = 0; i < src.rows; i++ ) {
-        for ( int j = 0; j < left / 2; j++ ) {
-            dst.at<T>( i + top + 1, j ) = src.at<T>( i, src.cols - ( left / 2 ) + j );
+        for ( int j = 0; j < left; j++ ) {
+            dst.at<T>( i + top, j ) = src.at<T>( i, src.cols - left + j );
         }
     }
 
     for ( int i = 0; i < src.rows; i++ ) {
-        for ( int j = right / 2; j < right; j++ ) {
-            dst.at<T>( i + top - 1, dst.cols - right + j ) = src.at<T>( i , j - ( right / 2 ) );
+        for ( int j = 0; j < right; j++ ) {
+            dst.at<T>( i + top, dst.cols - right + j ) = src.at<T>( i , j );
         }
     }
 
+    // per top e bottom lavoro direttamente sull'immagine dst essendo gia stata modificata
     for ( int i = 0; i < top; i++ ) {
         for ( int j = 0; j < dst.cols; j++ ) {
-            dst.at<T>( i, j ) = dst.at<T>( dst.rows - bottom - top + i - 1, j );
+            dst.at<T>( i, j ) = dst.at<T>( dst.rows - bottom - top + i, j );
         }
     }
 
     for ( int i = 0; i < bottom; i++ ) {
         for ( int j = 0; j < dst.cols; j++ ) {
-            dst.at<T>( dst.rows - bottom + i - 1, j ) = dst.at<T>( i + top, j );
+            dst.at<T>( dst.rows - bottom + i, j ) = dst.at<T>( i + top, j );
         }
     }
 }
