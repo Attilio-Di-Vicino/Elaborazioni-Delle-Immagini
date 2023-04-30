@@ -9,8 +9,8 @@ using namespace std;
 
 class MyBlur {
     private:
-        template<typename T> static Mat myBlurSumOneChannel( Mat, Mat, int, int );
-        template<typename T> static Mat myBlurSumMoreChannels( Mat, Mat, int, int );
+        template<typename T> static Mat oneChannel( Mat, Mat, int, int );
+        template<typename T> static Mat moreChannels( Mat, Mat, int, int );
     public:
         template<typename T> static Mat myBlur( Mat, int );
 };
@@ -30,17 +30,17 @@ template<typename T> Mat MyBlur::myBlur( Mat imageA, int kernelSize ) {
     int channels = image.channels();
 
     if ( channels == 1 ) {
-        return myBlurSumOneChannel<uchar>( image, paddedImage, kernelSize, channels );
+        return oneChannel<uchar>( image, paddedImage, kernelSize, channels );
     } else if ( channels == 2 ) {
-        return myBlurSumMoreChannels<Vec2b>( image, paddedImage, kernelSize, channels );
+        return moreChannels<Vec2b>( image, paddedImage, kernelSize, channels );
     } else if ( channels == 3 ) {
-        return myBlurSumMoreChannels<Vec3b>( image, paddedImage, kernelSize, channels );
+        return moreChannels<Vec3b>( image, paddedImage, kernelSize, channels );
     }
     
     return image;
 }
 
-template<typename T> Mat MyBlur::myBlurSumOneChannel( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
+template<typename T> Mat MyBlur::oneChannel( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
 
     for ( int i = 0; i < image.rows; i++ )
         for( int j = 0; j < image.cols; j++ ) {
@@ -56,7 +56,7 @@ template<typename T> Mat MyBlur::myBlurSumOneChannel( Mat image, Mat paddedImage
     return image;
 }
 
-template<typename T> Mat MyBlur::myBlurSumMoreChannels( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
+template<typename T> Mat MyBlur::moreChannels( Mat image, Mat paddedImage, int kernelSize, int channels ) { 
 
     for ( int i = 0; i < image.rows; i++ )
         for( int j = 0; j < image.cols; j++ ) {

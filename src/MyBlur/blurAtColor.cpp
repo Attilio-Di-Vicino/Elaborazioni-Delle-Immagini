@@ -54,6 +54,7 @@ int main( int argc, char** argv )
     waitKey( 0 );
 
     Mat blurredImage = myBlur<Vec3b>( image, 11 );
+    // Mat blurredImage = MyBlur::myBlur<Vec3b>( image, 11 );
 
     imshow( "blurredImage", blurredImage );
     waitKey( 0 );
