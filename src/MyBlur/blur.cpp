@@ -10,7 +10,7 @@
 #include "../Algorithm/MyPadding.h"
 #include "../Algorithm/MyBlur.h"
 
-// g++ blurAtColor.cpp -o padding $(pkg-config --cflags --libs opencv)
+// g++ blur.cpp -o padding $(pkg-config --cflags --libs opencv)
 // ./padding giacinto.jpg
 
 #include <iostream>
