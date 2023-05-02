@@ -19,6 +19,7 @@ using namespace cv;
 using namespace std;
 
 void myFilter2D( Mat, Mat&, Mat, MyBorderType );
+void myFilter2DG( Mat, Mat&, Mat, MyBorderType );
 int main( int argc, char** argv )
 {
     String imageName( "HappyFish.jpg" ); // by default
@@ -28,7 +29,7 @@ int main( int argc, char** argv )
     }
 
     Mat image;
-    image = imread( samples::findFile( imageName ), IMREAD_COLOR ); // Read the file
+    image = imread( samples::findFile( imageName ), IMREAD_GRAYSCALE ); // Read the file
 
     if( image.empty() )                      // Check for invalid input
     {
@@ -71,9 +72,15 @@ int main( int argc, char** argv )
     // correlazione
     Mat myCorrelazione;
     image.copyTo( myCorrelazione );
-    myFilter2D( image, myCorrelazione, average_filter, MyBorderType::BORDER_WRAP );
+    myFilter2DG( image, myCorrelazione, average_filter, MyBorderType::BORDER_WRAP );
 
     imshow( "myCorrelazione", myCorrelazione );
+    waitKey(0);
+
+    // differenza 
+    Mat diff = correlazione - myCorrelazione;
+
+    imshow( "diff", diff );
     waitKey(0);
 
     return 0;
@@ -84,7 +91,8 @@ void myFilter2D( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
     int ksize = kernel.rows;
 
     Mat paddedImage;
-    MyPadding<Vec3b>::autoPadding( src, paddedImage, ksize, borderType );
+    //MyPadding<Vec3b>::autoPadding( src, paddedImage, ksize, borderType );
+    copyMakeBorder( src, paddedImage, ksize / 2, ksize / 2, ksize / 2, ksize / 2, BORDER_REFLECT  );
 
     int channels = src.channels();
 
@@ -108,8 +116,42 @@ void myFilter2D( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
             
             // media della somma e assegnazione all'immagine di ritorno
             for ( int cii = 0; cii < channels; cii++ ) {
-                // sum[ cii ] = sum[ cii ] > 255 ? 255: sum[ cii ] < 0 ? 0: sum[ cii ];
                 dst.at<Vec3b>( i, j )[ cii ] = sum[ cii ];          
+            }
+        }
+        // normalize( dst, dst, 0, 255, NORM_MINMAX, CV_8U );
+}
+
+void myFilter2DG( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
+
+    int ksize = kernel.rows;
+
+    Mat paddedImage;
+    MyPadding<uchar>::autoPadding( src, paddedImage, ksize, borderType );
+
+    int channels = src.channels();
+
+    for ( int i = 0; i < src.rows; i++ )
+        for( int j = 0; j < src.cols; j++ ) {
+
+            // dichiaro un array per le somme con size uguale ai rispettivi canali dell'immagine
+            // inizializzo ogni volta le somme
+            int sum[ channels ];
+            for ( int cii = 0; cii < channels; cii++ )
+                sum[ cii ] = 0;
+
+            for( int r = 0; r < ksize; r++ ) // kernel
+                for( int c = 0; c < ksize; c++ ) {
+                    
+                    // somma nell'intorno
+                    for ( int cii = 0; cii < channels; cii++ ) {
+                        sum[ cii ] += paddedImage.at<uchar>( i + r, j + c ) * kernel.at<float>( r, c );
+                    }
+                }
+            
+            // media della somma e assegnazione all'immagine di ritorno
+            for ( int cii = 0; cii < channels; cii++ ) {
+                dst.at<uchar>( i, j ) = sum[ cii ];          
             }
         }
         // normalize( dst, dst, 0, 255, NORM_MINMAX, CV_8U );
