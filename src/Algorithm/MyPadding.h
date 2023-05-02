@@ -52,7 +52,14 @@ template <typename T> class MyPadding {
         static void padding( Mat src, Mat& dst, int borderSize, const Scalar value );
         static void padding( Mat src, Mat& dst, int borderSize, MyBorderType borderType );
         static void padding( Mat src, Mat& dst, int borderSize );
+        
+        static void autoPadding( Mat src, Mat& dst, int ksize, MyBorderType borderType );
 };
+
+template <typename T> void MyPadding<T>::autoPadding( Mat src, Mat& dst, int ksize, MyBorderType borderType ) {
+    int size = ksize / 2;
+    padding( src, dst, size, size, size, size, borderType, Scalar( 0, 0 ) );
+}
 
 template <typename T> void MyPadding<T>::padding( Mat src, Mat& dst, int top, int bottom, int left, int right, MyBorderType borderType, const Scalar value ) {
     switch ( borderType )

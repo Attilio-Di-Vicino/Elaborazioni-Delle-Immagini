@@ -50,5 +50,6 @@ int main( int argc, char** argv )
     //! [wait]
     waitKey(0); // Wait for a keystroke in the window
     //! [wait]
+    
     return 0;
 }
