@@ -7,6 +7,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include "../Algorithm/MyPadding.h"
+#include "../Algorithm/MyFilter2D.h"
 
 
 // g++ esercizio02.cpp $(pkg-config --cflags --libs opencv)
@@ -29,7 +30,7 @@ int main( int argc, char** argv )
     }
 
     Mat image;
-    image = imread( samples::findFile( imageName ), IMREAD_GRAYSCALE ); // Read the file
+    image = imread( samples::findFile( imageName ), IMREAD_COLOR ); // Read the file
 
     if( image.empty() )                      // Check for invalid input
     {
@@ -69,10 +70,10 @@ int main( int argc, char** argv )
     imshow( "convoluzione", convoluzione );
     waitKey(0);
 
-    // correlazione
+    // correlazione a colori
     Mat myCorrelazione;
-    image.copyTo( myCorrelazione );
-    myFilter2DG( image, myCorrelazione, average_filter, MyBorderType::BORDER_WRAP );
+    MyFilter2D::myFilter2D<Vec3b>( image, myCorrelazione, average_filter );
+    // myFilter2D( image, myCorrelazione, average_filter, MyBorderType::BORDER_WRAP );
 
     imshow( "myCorrelazione", myCorrelazione );
     waitKey(0);
@@ -91,8 +92,8 @@ void myFilter2D( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
     int ksize = kernel.rows;
 
     Mat paddedImage;
-    //MyPadding<Vec3b>::autoPadding( src, paddedImage, ksize, borderType );
-    copyMakeBorder( src, paddedImage, ksize / 2, ksize / 2, ksize / 2, ksize / 2, BORDER_REFLECT  );
+    MyPadding<Vec3b>::autoPadding( src, paddedImage, ksize, borderType );
+    // copyMakeBorder( src, paddedImage, ksize / 2, ksize / 2, ksize / 2, ksize / 2, BORDER_REFLECT  );
 
     int channels = src.channels();
 
@@ -101,9 +102,9 @@ void myFilter2D( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
 
             // dichiaro un array per le somme con size uguale ai rispettivi canali dell'immagine
             // inizializzo ogni volta le somme
-            int sum[ channels ];
+            float sum[ channels ];
             for ( int cii = 0; cii < channels; cii++ )
-                sum[ cii ] = 0;
+                sum[ cii ] = 0.0;
 
             for( int r = 0; r < ksize; r++ ) // kernel
                 for( int c = 0; c < ksize; c++ ) {
@@ -116,10 +117,9 @@ void myFilter2D( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
             
             // media della somma e assegnazione all'immagine di ritorno
             for ( int cii = 0; cii < channels; cii++ ) {
-                dst.at<Vec3b>( i, j )[ cii ] = sum[ cii ];          
+                dst.at<Vec3b>( i, j )[ cii ] = floor( sum[ cii ] );          
             }
         }
-        // normalize( dst, dst, 0, 255, NORM_MINMAX, CV_8U );
 }
 
 void myFilter2DG( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
@@ -128,6 +128,7 @@ void myFilter2DG( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
 
     Mat paddedImage;
     MyPadding<uchar>::autoPadding( src, paddedImage, ksize, borderType );
+    // copyMakeBorder( src, paddedImage, ksize / 2, ksize / 2, ksize / 2, ksize / 2, BORDER_REFLECT  );
 
     int channels = src.channels();
 
@@ -136,9 +137,9 @@ void myFilter2DG( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
 
             // dichiaro un array per le somme con size uguale ai rispettivi canali dell'immagine
             // inizializzo ogni volta le somme
-            int sum[ channels ];
+            float sum[ channels ];
             for ( int cii = 0; cii < channels; cii++ )
-                sum[ cii ] = 0;
+                sum[ cii ] = 0.0;
 
             for( int r = 0; r < ksize; r++ ) // kernel
                 for( int c = 0; c < ksize; c++ ) {
@@ -151,8 +152,7 @@ void myFilter2DG( Mat src, Mat& dst, Mat kernel, MyBorderType borderType ) {
             
             // media della somma e assegnazione all'immagine di ritorno
             for ( int cii = 0; cii < channels; cii++ ) {
-                dst.at<uchar>( i, j ) = sum[ cii ];          
+                dst.at<uchar>( i, j ) = floor( sum[ cii ] );          
             }
         }
-        // normalize( dst, dst, 0, 255, NORM_MINMAX, CV_8U );
 }
