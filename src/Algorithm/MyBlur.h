@@ -15,6 +15,16 @@ class MyBlur {
         template<typename T> static Mat myBlur( Mat, int );
 };
 
+/**
+ * myBlur permette di effettuare il blur su un'immagine
+ * utilizza un kernel il quale sarà indispensabile per effettuare 
+ * la somma e la media nell'intorno preso in input per semplicità
+ * se l'intorno è pari verrà trasformato in dispari per avere un ancor point centrale al kernel
+ * 
+ * @param imageA immagine di default al quale si vuole applicare il blur
+ * @param kernelSize size del kernel
+ * @return immagine con blur effettuato
+*/
 template<typename T> Mat MyBlur::myBlur( Mat imageA, int kernelSize ) {
     Mat image( imageA );
 

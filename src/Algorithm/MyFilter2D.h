@@ -23,6 +23,9 @@ template<typename T> void MyFilter2D::myFilter2D( Mat src, Mat& dst, Mat filter 
     Mat paddedImage;
     copyMakeBorder( src, paddedImage, xPad / 2, xPad / 2, yPad / 2, yPad / 2, BORDER_WRAP  );
 
+    if ( dst.empty() )
+        src.copyTo( dst );
+
     int channels = src.channels();
 
     if ( channels == 1 ) {
