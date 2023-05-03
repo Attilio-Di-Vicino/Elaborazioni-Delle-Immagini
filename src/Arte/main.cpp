@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 
     cv::Mat frame; // Create a object
     cap.read(frame); // read the frame
-    file << "/home/attilio/Scrivania/Elaborazioni-Delle-Immagini/src/Arte" << counter << ".jpg"; // file name
+    file << "/home/attilio/Scrivania/Elaborazioni-Delle-Immagini/src/image" << counter << ".jpg"; // file name
     cv::imwrite(file.str(), frame);
     counter++; // increment the counter
 
