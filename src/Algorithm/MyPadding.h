@@ -83,7 +83,7 @@ template <typename T> void MyPadding<T>::padding( Mat src, Mat& dst, int top, in
             break;
         case MyBorderType::BORDER_REFLECT_101: borderReflect101( src, dst, top, bottom, left, right, value );
             break;
-        default: borderReflect101( src, dst, top, bottom, left, right, value );
+        default: borderWrap( src, dst, top, bottom, left, right, value );
             break;
     }
 }
