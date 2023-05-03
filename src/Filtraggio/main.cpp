@@ -40,42 +40,49 @@ int main( int argc, char** argv )
     waitKey(0);
 
     // oggetto mat utilizzato come filtro
-    Mat myFilter = ( Mat_<uchar>( 3, 3 ) << 1, 1, 1,
-                                            1, 1, 1,
-                                            1, 1, 1);
+    Mat myFilter = ( Mat_<float>( 3, 3 ) << 0,  1,  0,
+                                            1, -4,  1,
+                                            0,  1,  0);
 
     // Allocazione filtro correlazione e convoluzione
     // in questo caso si utilizza un filtro composto da 1
     // di fatti avremo lo stesso risultato con correlazione e convoluzione
     Mat average_filter = Mat::ones( DIM, DIM, CV_32F ) / ( float ) ( DIM * DIM );
 
-    //Per la convoluzione ruotare il filtro di 180°
-    Mat avarage_filter_180;
-    rotate( average_filter, avarage_filter_180, ROTATE_180 );
+    // blur
+    Mat blurDefault;
+    blur( image, blurDefault, Size( 3, 3 ) );
+
+    imshow( "blurDefault", blurDefault );
+    waitKey(0);
+
+    // Per la convoluzione ruotare il filtro di 180°
+    // Mat avarage_filter_180;
+    // rotate( average_filter, avarage_filter_180, ROTATE_180 );
 
     // correlazione
     Mat correlazione;
-    filter2D( image, correlazione, image.type(), average_filter );
+    filter2D( blurDefault, correlazione, image.type(), myFilter );
 
     imshow( "correlazione", correlazione );
     waitKey(0);
 
-    // convoluzione
-    Mat convoluzione;
-    filter2D( image, convoluzione, image.type(), avarage_filter_180 );
+    // // convoluzione
+    // Mat convoluzione;
+    // filter2D( image, convoluzione, image.type(), avarage_filter_180 );
 
-    imshow( "convoluzione", convoluzione );
-    waitKey(0);
+    // imshow( "convoluzione", convoluzione );
+    // waitKey(0);
 
     // correlazione a colori
     Mat myCorrelazione;
-    MyFilter2D::myFilter2D<Vec3b>( image, myCorrelazione, average_filter );
+    MyFilter2D::myFilter2D( blurDefault, myCorrelazione, myFilter );
 
     imshow( "myCorrelazione", myCorrelazione );
     waitKey(0);
 
     // differenza 
-    Mat diff = correlazione - myCorrelazione;
+    Mat diff = abs(myCorrelazione - correlazione);
 
     imshow( "diff", diff );
     waitKey(0);

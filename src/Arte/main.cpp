@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     Mat image;
     image = imread(samples::findFile(imageName), IMREAD_COLOR); // Read the file
 
-    image = Mat::zeros( 500, 700, CV_32S );
+    // image = Mat::zeros( 500, 700, CV_32S );
 
     if (image.empty()) // Check for invalid input
     {
@@ -41,12 +41,10 @@ int main(int argc, char **argv)
 
     int random_number = min_value + (std::rand() % (max_value - min_value + 1));
 
-    for (int i = 0; i < 500; i++)
-        for (int j = 0; j < 700; j++)
+    for (int i = 0; i < image.rows; i++)
+        for (int j = 0; j < image.cols; j++)
         {
-            image.at<Vec3b>(i, j)[0] = i * j / 30;
-            image.at<Vec3b>(i, j)[1] = i * j / 12;
-            image.at<Vec3b>(i, j)[2] = i * j / 1997;
+            image.at<Vec3b>(i, j) = i * j / 28 * 24;
         }
 
     imshow("Display window", image);

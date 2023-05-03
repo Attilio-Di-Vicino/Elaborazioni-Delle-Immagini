@@ -12,28 +12,28 @@ class MyFilter2D {
         static void correlazioneC1( Mat src, Mat& dst, Mat paddedImage, Mat filter );
         template<typename T> static void correlazioneC( Mat src, Mat& dst, Mat paddedImage, Mat filter, int channels );
     public:
-        template<typename T> static void myFilter2D( Mat src, Mat& dst, Mat filter );
+        static void myFilter2D( Mat src, Mat& dst, Mat filter );
 };
 
-template<typename T> void MyFilter2D::myFilter2D( Mat src, Mat& dst, Mat filter ) {
+void MyFilter2D::myFilter2D( Mat src, Mat& dst, Mat filter ) {
 
     int xPad = filter.rows;
     int yPad = filter.cols;
 
     Mat paddedImage;
-    copyMakeBorder( src, paddedImage, xPad / 2, xPad / 2, yPad / 2, yPad / 2, BORDER_WRAP  );
 
-    if ( dst.empty() )
-        src.copyTo( dst );
+    src.convertTo( dst, CV_32F );
 
     int channels = src.channels();
+   
+    copyMakeBorder( dst, paddedImage, xPad / 2, xPad / 2, yPad / 2, yPad / 2, BORDER_REFLECT  );
 
     if ( channels == 1 ) {
         correlazioneC1( src, dst, paddedImage, filter );
     } else if ( channels == 2 ) {
-        correlazioneC<Vec2b>( src, dst, paddedImage, filter, channels );
+        correlazioneC<Vec2f>( src, dst, paddedImage, filter, channels );
     } else if ( channels == 3 ) {
-        correlazioneC<Vec3b>( src, dst, paddedImage, filter, channels );
+        correlazioneC<Vec3f>( src, dst, paddedImage, filter, channels );
     }
 }
 
@@ -50,16 +50,18 @@ void MyFilter2D::correlazioneC1( Mat src, Mat& dst, Mat paddedImage, Mat filter 
                 for( int c = 0; c < filter.cols; c++ ) {
                     
                     // somma nell'intorno
-                    sum += paddedImage.at<uchar>( i + r, j + c ) * filter.at<float>( r, c );
+                    sum += paddedImage.at<float>( i + r, j + c ) * filter.at<float>( r, c );
                 }
             
             //assegnazione all'immagine di ritorno
-            dst.at<uchar>( i, j ) = floor( sum );
+            dst.at<float>( i, j ) = sum;
         }
+    dst.convertTo( dst, CV_8UC1 );
 }
 
 template<typename T> void MyFilter2D::correlazioneC( Mat src, Mat& dst, Mat paddedImage, Mat filter, int channels ) {
 
+   
     for ( int i = 0; i < src.rows; i++ )
         for( int j = 0; j < src.cols; j++ ) {
 
@@ -80,7 +82,8 @@ template<typename T> void MyFilter2D::correlazioneC( Mat src, Mat& dst, Mat padd
             
             // assegnazione all'immagine di ritorno
             for ( int cii = 0; cii < channels; cii++ ) {
-                dst.at<T>( i, j )[ cii ] = floor( sum[ cii ] );          
+                dst.at<T>( i, j )[ cii ] = sum[ cii ];          
             }
         }
+    dst.convertTo( dst, CV_8U );
 }
