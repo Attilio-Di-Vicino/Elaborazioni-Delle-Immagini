@@ -54,7 +54,7 @@ int main( int argc, char** argv )
     waitKey(0);
 
     Mat myLaplacian;
-    MyFilter2D::myFilter2D<uchar>( blurDefault, myLaplacian, myFilter );
+    MyFilter2D::myFilter2D( blurDefault, myLaplacian, myFilter );
 
     imshow( "myLaplacian", myLaplacian );
     waitKey(0);

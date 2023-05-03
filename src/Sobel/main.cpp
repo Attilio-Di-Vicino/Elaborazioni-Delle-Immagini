@@ -48,6 +48,11 @@ int main( int argc, char** argv )
                                               -2,  0,  2,
                                               -1,  0,  1 );
 
+    // filtro laplaciano 45 gradi
+    Mat myFilter45 = ( Mat_<float>( 3, 3 ) << 1,  1,  1,
+                                              1, -8,  1,
+                                              1,  1,  1 );
+
     // my sobel 90 gradiente x
     Mat mySobelGX;
     MyFilter2D::myFilter2D( image, mySobelGX, myFilterGX );
@@ -96,6 +101,18 @@ int main( int argc, char** argv )
     addWeighted( absSobelX, 0.5, absSobelY, 0.5, 0, sobel );
 
     imshow( "sobel", sobel );
+    waitKey(0);
+
+    // effettuo laplaciano 45 gradi su riposta sobel
+    // my laplaciano 45 gradi
+    Mat myLaplaciano45;
+    MyFilter2D::myFilter2D( sobel, myLaplaciano45, myFilter45 );
+
+    imshow( "myLaplaciano45", myLaplaciano45 );
+    waitKey(0);
+
+    Mat sharpening = abs( image - myLaplaciano45 );
+    imshow( "sharpening", sharpening );
     waitKey(0);
 
     return 0;
