@@ -1,4 +1,4 @@
-## # src
+# src
 
 La cartella `src` contiene i codici sorgente per l'elaborazione delle immagini, basati sulla libreria OpenCV, e alcune implementazioni personalizzate all'interno della cartella `Algorithm`.
 
