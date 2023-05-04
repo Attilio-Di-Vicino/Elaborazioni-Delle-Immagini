@@ -21,19 +21,21 @@ Per compilare i file `.cpp` è necessario eseguire alcune procedure.
     ./z-compile-alias.sh
     ```
 
-4. Compilare i file `.cpp` tramite il comando:
+4. Aprire un nuvo terminale fino ad arrivare alla directory `src`.
+
+5. Compilare i file `.cpp` tramite il comando:
 
     ```
     cv file.cpp
     ```
 
-Questo genererà l'eseguibile `a.out`, che può essere eseguito tramite il comando:
+6. Questo genererà l'eseguibile `a.out`, che può essere eseguito tramite il comando:
 
     ```
     nome_immagine
     ```
 
-Ad esempio, per eseguire l'immagine `lena`, eseguire il seguente comando:
+Ad esempio, per eseguire il file a.out con l'immagine `lena`, eseguire il seguente comando:
 
     ```
     lena
