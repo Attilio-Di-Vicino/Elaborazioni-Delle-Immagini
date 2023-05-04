@@ -1,5 +1,3 @@
-# chmod +x set-alias.sh
-# nano ~/.bashrc
 #!/bin/bash
 
 echo 'alias cv="./z-compile.sh"' >> ~/.bashrc
