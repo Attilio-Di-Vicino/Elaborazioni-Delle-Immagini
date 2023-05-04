@@ -64,7 +64,7 @@ Per installare OpenCV, seguire i seguenti passaggi:
 
     Questo comando dovrebbe restituire la versione di OpenCV installata.
 
-## Utilizzo delle elaborazioni delle immagini
+## Compilazione OpenCV
 
 Per utilizzare le elaborazioni delle immagini, è necessario compilare il file sorgente corrispondente all'elaborazione desiderata. Ad esempio, per compilare il file sorgente relativo al rilevamento dei bordi, eseguire il seguente comando da terminale:
 
@@ -79,3 +79,9 @@ Questo comando compilerà il file sorgente `edge_detection.cpp` e genererà l'es
 ```
 
 Dove `<nome_immagine>` è il nome del file immagine su cui eseguire l'elaborazione.
+
+## Compilazione personalizzata
+
+Vedere il README.md del seguente link:
+
+https://github.com/Attilio-Di-Vicino/Elaborazioni-Delle-Immagini/tree/main/src
