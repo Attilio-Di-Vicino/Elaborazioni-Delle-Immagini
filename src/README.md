@@ -35,8 +35,25 @@ Per compilare i file `.cpp` è necessario eseguire alcune procedure.
     nome_immagine
     ```
 
-Ad esempio, per eseguire il file a.out con l'immagine `lena`, eseguire il seguente comando:
+7. Ad esempio, per eseguire il file a.out con l'immagine `lena`, eseguire il seguente comando:
 
     ```
     lena
     ```
+
+### Eliminazione alias
+
+Se si vogliono cancellare gli alias generati tramile il file `z-compile-alias.sh`:
+
+1. Aprire un nuovo terminale
+
+2. Digitare il comando:
+
+    ```
+    nano ~/.bashrc
+    ```
+3. Trovare gli alias generati
+
+4. Cancellarli manualmente dal file sul terminale
+
+5. Salvare le operaizoni premendo `Ctrl x` e successivamente `y` 
