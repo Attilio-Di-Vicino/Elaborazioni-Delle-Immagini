@@ -12,39 +12,105 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <iostream>
+
 using namespace cv;
 
 /// Global variables
 Mat src, src_gray;
-Mat dst, detected_edges;
+Mat dst, detected_edges, detected_edgesMyCanny;
 
-int edgeThresh = 1;
-
-int hightThreshold = 125;
+int hightThreshold = 190;
 int const max_hightThreshold = 255;
 
-int lowThreshold = 35;
+int lowThreshold = 40;
 int const max_lowThreshold = 255;
 
-int ratio = 3;
-int kernel_size = 3;
-char* window_name = "Edge Map";
+void myCanny( Mat image, Mat& edges, double threshold1, double threshold2, int apertureSize = 3, bool L2gradient = false ) {
 
-void myCanny( Mat image, Mat edges, double threshold1, double threshold2, int apertureSize = 3, bool L2gradient = false ) {
+  // 1. Convolvere l'immagini di input con un filtro Gaussiano
+  Mat paddedImage;
+  Mat gaussianBlur;
+  copyMakeBorder( image, paddedImage, 1, 1, 1, 1, BORDER_REFLECT );
+  GaussianBlur( paddedImage, gaussianBlur, Size( 3, 3 ), 0, 0 );
 
-    // Gaussian blur
-    Mat gaussianBlurDefault;
-    GaussianBlur( image, gaussianBlurDefault, Size( 3, 3 ), 0, 0 );
+  // 2. Calcolare la magnitudo e l'orientazione del gradiente
+  Mat dx, dy;
+	Sobel( gaussianBlur, dx, CV_32FC1, 1, 0, apertureSize );
+	Sobel( gaussianBlur, dy, CV_32FC1, 0, 1, apertureSize );
 
-    Mat dx, dy;
-	Sobel( gaussianBlurDefault, dx, CV_32FC1, 1, 0, kernel_size);
-	Sobel( gaussianBlurDefault, dy, CV_32FC1, 0, 1, kernel_size);
+  Mat mag;
+  mag = abs( dx + dy );
+  
+  Mat ang;
+  float ang_val;
+  phase( dx, dy, ang, true );
 
-    Mat mag;
-    mag = abs( dx + dy );
-    
-    Mat ph;
-    phase( dx, dy, ph, true );
+  // normalize( mag, mag, 0, 255, NORM_MINMAX );
+	mag.convertTo( mag, CV_8UC1 );
+	
+	// normalize( ang, ang, -180, 180, NORM_MINMAX );
+
+  // 3. Applicare la non maxima suppression
+  for ( int i = 1; i < mag.rows - 1; i++ ) {
+
+		for( int j = 1; j < mag.cols - 1; j++ ) {
+
+			ang_val = ang.at<float>( i, j );
+			
+			if ( ( ang_val <= -157.5 && ang_val > 157.5 ) || ( ang_val > -22.5 && ang_val <= 22.5 ) ) { 
+				if ( mag.at<uchar>( i, j ) < mag.at<uchar>( i, j-1 ) || mag.at<uchar>( i, j ) < mag.at<uchar>( i, j+1 ) )
+					mag.at<uchar>( i, j ) = 0;
+			
+      } else if ( ( ang_val <= -112.5 && ang_val > -157.5 ) || ( ang_val > 22.5 && ang_val <= 67.5 ) ) {
+				if ( mag.at<uchar>( i, j ) < mag.at<uchar>( i-1 , j-1 ) || mag.at<uchar>( i, j ) < mag.at<uchar>( i+1, j+1 ) )
+					mag.at<uchar>( i, j ) = 0;
+			
+      } else if ( ( ang_val <= -67.5 && ang_val > -112.5 ) || ( ang_val > 67.5 && ang_val <= 112.5 ) ) {
+				if ( mag.at<uchar>( i, j ) < mag.at<uchar>( i+1, j ) || mag.at<uchar>( i, j ) < mag.at<uchar>( i-1, j ) )
+					mag.at<uchar>( i, j ) = 0; 	
+			
+      } else if ( ( ang_val <= -22.5 && ang_val > -67.5 ) || ( ang_val > 112.5 && ang_val <= 157.5 ) ) {
+				if ( mag.at<uchar>( i, j ) < mag.at<uchar>( i-1, j+1 ) || mag.at<uchar>( i, j ) < mag.at<uchar>( i+1, j-1 ) )
+					mag.at<uchar>( i, j ) = 0;	
+			}
+		}
+	}
+
+  // 4. Applicare il thresholding con isteresi
+  for ( int i = 1; i < mag.rows-1; i++ ) {
+		for ( int j = 1; j < mag.cols-1; j++ ) {
+
+			if ( mag.at<uchar>( i, j ) > threshold2 ) 
+        mag.at<uchar>( i, j ) = 255;
+			
+      else if ( mag.at<uchar>( i, j ) < threshold1 )
+        mag.at<uchar>( i, j ) = 0;
+			
+      else if ( mag.at<uchar>( i, j ) <= threshold2 && mag.at<uchar>( i, j ) >= threshold1 ) {
+				
+        bool strong_n = false;
+				for ( int x = -1; x <= 1 && !strong_n ; x++ ) {
+					for ( int y = -1; y <= 1 && !strong_n ; y++ ) {
+						if( mag.at<uchar>( i+x , j+y ) > threshold2 )
+              strong_n = true;
+					}
+				}
+
+				if ( strong_n )
+          mag.at<uchar>( i,j ) = 255;
+				else
+          mag.at<uchar>( i, j ) = 0;
+			}
+		}
+	}
+
+	int x = 1;
+	int y = 1;
+	int height = mag.rows -2;
+	int width = mag.cols -2;
+	Rect roiRect( x, y, width, height );
+	edges = mag( roiRect );
 }
 
 /**
@@ -54,18 +120,19 @@ void myCanny( Mat image, Mat edges, double threshold1, double threshold2, int ap
 void CannyThreshold( int, void* ) {
 
   /// Reduce noise with a kernel 3x3
-  blur( src_gray, detected_edges, Size(3,3) );
+  blur( src_gray, detected_edges, Size( 3, 3 ) );
+  blur( src_gray, detected_edgesMyCanny, Size( 3, 3 ) );
 
   /// Canny detector
-  // Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
-  Canny( detected_edges, detected_edges, lowThreshold, hightThreshold, kernel_size );
-  myCanny( detected_edges, detected_edges, lowThreshold, hightThreshold, kernel_size );
+  Canny( detected_edges, detected_edges, lowThreshold, hightThreshold );
+  myCanny( detected_edgesMyCanny, detected_edgesMyCanny, lowThreshold, hightThreshold );
 
   /// Using Canny's output as a mask, we display our result
-  dst = Scalar::all(0);
+  // dst = Scalar::all(0);
 
-  src.copyTo( dst, detected_edges);
-  imshow( window_name, dst );
+  // src.copyTo( dst, detected_edges);
+  imshow( "Canny", detected_edges );
+  imshow( "My Canny", detected_edgesMyCanny );
 }
 
 /** @function main */
@@ -84,13 +151,20 @@ int main( int argc, char** argv ) {
   cvtColor( src, src_gray, COLOR_BGR2GRAY );
 
   /// Create a window
-  namedWindow( window_name, WINDOW_AUTOSIZE );
+  namedWindow( "Canny", WINDOW_AUTOSIZE );
+  namedWindow( "My Canny", WINDOW_AUTOSIZE );
 
   /// Create a Trackbar for user to enter threshold
-  createTrackbar( "Max Threshold:", window_name, &hightThreshold, max_hightThreshold, CannyThreshold );
+  createTrackbar( "Max Threshold:", "Canny", &hightThreshold, max_hightThreshold, CannyThreshold );
 
   /// Create a Trackbar for user to enter threshold
-  createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
+  createTrackbar( "Min Threshold:", "Canny", &lowThreshold, max_lowThreshold, CannyThreshold );
+
+    /// Create a Trackbar for user to enter threshold
+  createTrackbar( "Max Threshold:", "My Canny", &hightThreshold, max_hightThreshold, CannyThreshold );
+
+  /// Create a Trackbar for user to enter threshold
+  createTrackbar( "Min Threshold:", "My Canny", &lowThreshold, max_lowThreshold, CannyThreshold );
 
   /// Show the image
   CannyThreshold(0, 0);
@@ -99,4 +173,4 @@ int main( int argc, char** argv ) {
   waitKey(0);
 
   return 0;
-  }
+}
