@@ -1,6 +1,16 @@
 # Elaborazioni delle immagini
 
-Questo progetto consiste in una serie di elaborazioni delle immagini implementate in C++ utilizzando la libreria OpenCV. Le elaborazioni attualmente implementate includono il rilevamento dei bordi, la segmentazione dell'immagine tramite clustering, la trasformazione di Hough per il rilevamento di linee e la trasformazione di Hough probabilistica per il rilevamento di segmenti.
+Questo progetto consiste in una serie di elaborazioni delle immagini implementate in C++ utilizzando la libreria OpenCV. Le elaborazioni attualmente implementate includono:
+
+- **Rilevamento dei bordi**: utilizzando algoritmi come Canny e Harris per individuare i bordi presenti nell'immagine.
+- **Segmentazione dell'immagine tramite clustering**: applicazione di algoritmi di clustering come k-means e mean-shift per raggruppare i pixel dell'immagine in segmenti omogenei.
+- **Trasformazione di Hough per il rilevamento di linee e cerchi**: utilizzo della trasformazione di Hough per identificare linee rette e cerchi presenti nell'immagine.
+- **Algoritmi classici**: implementazione di algoritmi classici di elaborazione delle immagini, come split and merge per la segmentazione gerarchica dell'immagine.
+- **Altri algoritmi di segmentazione**: inclusione di tecniche come region growing per la segmentazione dell'immagine in base a criteri di omogeneità.
+
+Queste funzionalità offrono diverse possibilità di analisi e manipolazione delle immagini, consentendo di ottenere risultati interessanti e utili per varie applicazioni.
+
+Per utilizzare il progetto, è necessario avere installata la libreria OpenCV e compilare il codice sorgente C++ utilizzando un compilatore compatibile.
 
 ## Installazione di OpenCV
 
