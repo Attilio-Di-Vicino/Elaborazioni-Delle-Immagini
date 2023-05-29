@@ -20,10 +20,10 @@ using namespace cv;
 Mat src, src_gray;
 Mat dst, Mydst, detected_edges, detected_edgesMyCanny;
 
-int hightThreshold = 190;
+int hightThreshold = 80;
 int const max_hightThreshold = 255;
 
-int lowThreshold = 40;
+int lowThreshold = 35;
 int const max_lowThreshold = 255;
 
 /**
@@ -46,7 +46,9 @@ void CannyThreshold( int, void* ) {
 
   //   src.copyTo( dst, detected_edges);
   //   src.copyTo( Mydst, detected_edgesMyCanny );
-  imshow( "Src", src );
+
+  // cvtColor( detected_edgesMyCanny, detected_edgesMyCanny, CV_GRAY2BGR );
+  imshow( "Src", src_gray );
   imshow( "Canny", detected_edges );
   imshow( "My Canny", detected_edgesMyCanny );
 }
