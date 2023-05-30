@@ -13,4 +13,7 @@ echo 'alias lena="./a.out image/lena.jpg"' >> ~/.bashrc
 echo 'alias logo="./a.out image/opencv-logo.png"' >> ~/.bashrc
 echo 'alias pattern="./a.out image/pattern.png"' >> ~/.bashrc
 
+# alis path
+echo 'alias elim="cd Scrivania/Elaborazioni-Delle-Immagini/src"' >> ~/.bashrc
+
 source ~/.bashrc

@@ -9,13 +9,13 @@ using namespace cv;
 
 class MyCanny {
     private:
-        static void nonMaxSuppression( const Mat&, const Mat&, Mat& );
-        static void thresholdingIsteresi( const Mat&, Mat&, bool, bool );
+        static void nonMaxSuppression( Mat&, const Mat&, Mat& );
+        static void thresholdingIsteresi( Mat&, bool, bool );
     public:
         static void myCanny( const Mat&, Mat&, double, double, int, bool );
 };
 
-void MyCanny::nonMaxSuppression( const Mat& magnitude, const Mat& phase, Mat& edges ) {
+void MyCanny::nonMaxSuppression( Mat& magnitude, const Mat& phase, Mat& edges ) {
 
     // Inizializzazione
     edges = Mat::zeros( magnitude.size(), CV_8UC1 );
@@ -46,21 +46,22 @@ void MyCanny::nonMaxSuppression( const Mat& magnitude, const Mat& phase, Mat& ed
                 r = magnitude.at<uchar>( i+1, j-1 );
 			}
 
-            if ( mag < q || mag < r )
+            if ( mag < q || mag < r ){
                 edges.at<uchar>( i, j ) = 0;
+                magnitude.at<uchar>( i, j ) = 0;
+            }
         }
     }
 }
 
-void MyCanny::thresholdingIsteresi( const Mat& edges, Mat& dst, bool threshold1, bool threshold2 ) {
+void MyCanny::thresholdingIsteresi( Mat& edges, bool threshold1, bool threshold2 ) {
 
-    edges.copyTo( dst );
     for ( int i = 1; i < edges.rows - 1; i++ ) {
         for ( int j = 1; j < edges.cols - 1; j++ ) {
 
             uchar pixel = edges.at<uchar>( i, j );
 
-            if ( pixel >= threshold2 )
+            if ( pixel > threshold2 )
                 pixel = 255;
             else if ( pixel <= threshold1 )
                 pixel = 0;
@@ -77,7 +78,7 @@ void MyCanny::thresholdingIsteresi( const Mat& edges, Mat& dst, bool threshold1,
                 else
                     pixel = 0;
             }
-            dst.at<uchar>( i, j ) = pixel;
+            edges.at<uchar>( i, j ) = pixel;
         }
     }
 }
@@ -87,15 +88,13 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     // 1. Convolvere l'immagine di input con un filtro Gaussiano
     Mat paddedImage;
     Mat gaussianBlur;
-    copyMakeBorder( image, paddedImage, 2, 2, 2, 2, BORDER_REFLECT );
-    GaussianBlur( paddedImage, gaussianBlur, Size( 5, 5 ), 0, 0 );
+    copyMakeBorder( image, paddedImage, 1, 1, 1, 1, BORDER_REFLECT );
+    GaussianBlur( paddedImage, gaussianBlur, Size( 3, 3 ), 0, 0 );
 
     // 2. Calcolare la magnitudo e l'orientazione del gradiente
     Mat dx, dy;
-    Sobel( gaussianBlur, dx, gaussianBlur.type(), 1, 0, apertureSize );
-    Sobel( gaussianBlur, dy, gaussianBlur.type(), 0, 1, apertureSize );
-    dx.convertTo( dx, CV_32FC1 );
-    dy.convertTo( dy, CV_32FC1 );
+    Sobel( gaussianBlur, dx, CV_32FC1, 1, 0, apertureSize );
+    Sobel( gaussianBlur, dy, CV_32FC1, 0, 1, apertureSize );
 
     /**
      * La Magnitudo rappresenta la forza del gradiente in ciascun punto dell'immagine.
@@ -108,6 +107,11 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     // magnitude = abs( dx ) + abs( dy );
     cv::magnitude( dx, dy, magnitude );
     magnitude.convertTo( magnitude, CV_8UC1 );
+
+    Sobel( gaussianBlur, dx, gaussianBlur.type(), 1, 0, apertureSize );
+    Sobel( gaussianBlur, dy, gaussianBlur.type(), 0, 1, apertureSize );
+    dx.convertTo( dx, CV_32FC1 );
+    dy.convertTo( dy, CV_32FC1 );
 
     /**
      * La Fase fornisce informazioni sull'orientamento del gradiente in ciascun punto dell'immagine.
@@ -138,16 +142,19 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
      */
     nonMaxSuppression( magnitude, phase, edges );
 
+    // Visualizzazione immagine in fase di elaborazione
+    imshow( "magnitude", magnitude );
+    imshow( "phase", phase );
+    imshow( "NonMaxSuppression", edges );
+
     // 4. Applicare il thresholding con isteresi
-    // Mat dst;
-    // thresholdingIsteresi( edges, dst, threshold1, threshold2 );
-    // dst.copyTo( edges );
+    // thresholdingIsteresi( edges, threshold1, threshold2 );
     for ( int i = 1; i < edges.rows - 1; i++ ) {
         for ( int j = 1; j < edges.cols - 1; j++ ) {
 
             uchar pixel = edges.at<uchar>( i, j );
 
-            if ( pixel >= threshold2 )
+            if ( pixel > threshold2 )
                 pixel = 255;
             else if ( pixel <= threshold1 )
                 pixel = 0;

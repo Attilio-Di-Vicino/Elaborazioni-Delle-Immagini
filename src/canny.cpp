@@ -18,12 +18,12 @@ using namespace cv;
 
 /// Global variables
 Mat src, src_gray;
-Mat dst, Mydst, detected_edges, detected_edgesMyCanny;
+Mat detected_edges, detected_edgesMyCanny;
 
-int hightThreshold = 80;
+int hightThreshold = 105;
 int const max_hightThreshold = 255;
 
-int lowThreshold = 35;
+int lowThreshold = 25;
 int const max_lowThreshold = 255;
 
 /**
@@ -40,17 +40,9 @@ void CannyThreshold( int, void* ) {
   Canny( detected_edges, detected_edges, lowThreshold, hightThreshold );
   MyCanny::myCanny( detected_edgesMyCanny, detected_edgesMyCanny, lowThreshold, hightThreshold );
 
-  //   /// Using Canny's output as a mask, we display our result
-  //   dst = Scalar::all(0);
-  //   Mydst = Scalar::all(0);
-
-  //   src.copyTo( dst, detected_edges);
-  //   src.copyTo( Mydst, detected_edgesMyCanny );
-
-  // cvtColor( detected_edgesMyCanny, detected_edgesMyCanny, CV_GRAY2BGR );
   imshow( "Src", src_gray );
   imshow( "Canny", detected_edges );
-  imshow( "My Canny", detected_edgesMyCanny );
+  imshow( "MyCanny", detected_edgesMyCanny );
 }
 
 /** @function main */
@@ -62,10 +54,6 @@ int main( int argc, char** argv ) {
   if( !src.data )
   { return -1; }
 
-//   /// Create a matrix of the same type and size as src (for dst)
-//   dst.create( src.size(), src.type() );
-//   Mydst.create( src.size(), src.type() );
-
   /// Convert the image to grayscale
   // l'algoritmo si basa su immagini in scala di grigi da vedere
   cvtColor( src, src_gray, COLOR_BGR2GRAY );
@@ -73,7 +61,7 @@ int main( int argc, char** argv ) {
   /// Create a window
   namedWindow( "Src", WINDOW_AUTOSIZE );
   namedWindow( "Canny", WINDOW_AUTOSIZE );
-  namedWindow( "My Canny", WINDOW_AUTOSIZE );
+  namedWindow( "MyCanny", WINDOW_AUTOSIZE );
 
   /// Create a Trackbar for user to enter threshold
   createTrackbar( "Max Threshold:", "Src", &hightThreshold, max_hightThreshold, CannyThreshold );
