@@ -25,7 +25,7 @@ void MyCanny::nonMaxSuppression( const Mat& magnitude, const Mat& phase, Mat& ed
     for ( int i = 0; i < magnitude.rows; i++ ) {
         for ( int j = 0; j < magnitude.cols; j++ ) {
 
-            uchar angle = phase.at<uchar>( i, j );
+            float angle = phase.at<float>( i, j ) > 180 ? phase.at<float>( i, j ) - 360: phase.at<float>( i, j );
             uchar mag = magnitude.at<uchar>( i, j );
 
             // Horizontal edge 0 gradi
@@ -55,8 +55,8 @@ void MyCanny::nonMaxSuppression( const Mat& magnitude, const Mat& phase, Mat& ed
 void MyCanny::thresholdingIsteresi( const Mat& edges, Mat& dst, bool threshold1, bool threshold2 ) {
 
     edges.copyTo( dst );
-    for ( int i = 0; i < edges.rows - 1; i++ ) {
-        for ( int j = 0; j < edges.cols - 1; j++ ) {
+    for ( int i = 1; i < edges.rows - 1; i++ ) {
+        for ( int j = 1; j < edges.cols - 1; j++ ) {
 
             uchar pixel = edges.at<uchar>( i, j );
 
@@ -92,8 +92,10 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
 
     // 2. Calcolare la magnitudo e l'orientazione del gradiente
     Mat dx, dy;
-    Sobel( gaussianBlur, dx, CV_32FC1, 1, 0, apertureSize );
-    Sobel( gaussianBlur, dy, CV_32FC1, 0, 1, apertureSize );
+    Sobel( gaussianBlur, dx, gaussianBlur.type(), 1, 0, apertureSize );
+    Sobel( gaussianBlur, dy, gaussianBlur.type(), 0, 1, apertureSize );
+    dx.convertTo( dx, CV_32FC1 );
+    dy.convertTo( dy, CV_32FC1 );
 
     /**
      * La Magnitudo rappresenta la forza del gradiente in ciascun punto dell'immagine.
@@ -122,6 +124,9 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     Mat phase;
     cv::phase( dx, dy, phase, true );
 
+    imshow( "magnitude", magnitude );
+    imshow( "phase", phase );
+
     /**
      * 3. Applicare la non-maximum suppression
      *
@@ -140,8 +145,8 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     // Mat dst;
     // thresholdingIsteresi( edges, dst, threshold1, threshold2 );
     // dst.copyTo( edges );
-    for ( int i = 0; i < edges.rows - 1; i++ ) {
-        for ( int j = 0; j < edges.cols - 1; j++ ) {
+    for ( int i = 1; i < edges.rows - 1; i++ ) {
+        for ( int j = 1; j < edges.cols - 1; j++ ) {
 
             uchar pixel = edges.at<uchar>( i, j );
 
