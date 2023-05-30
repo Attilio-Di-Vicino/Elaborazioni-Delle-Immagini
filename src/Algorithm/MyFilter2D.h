@@ -15,6 +15,13 @@ class MyFilter2D {
         static void myFilter2D( Mat src, Mat& dst, Mat filter );
 };
 
+/**
+ * Applica un filtro 2D sull'immagine di origine.
+ *
+ * @param src L'immagine di origine.
+ * @param dst L'immagine di destinazione.
+ * @param filter Il filtro da applicare.
+ */
 void MyFilter2D::myFilter2D( Mat src, Mat& dst, Mat filter ) {
 
     int xPad = filter.rows;
@@ -37,6 +44,14 @@ void MyFilter2D::myFilter2D( Mat src, Mat& dst, Mat filter ) {
     }
 }
 
+/**
+ * Applica la correlazione su un'immagine monocromatica.
+ *
+ * @param src L'immagine di origine.
+ * @param dst L'immagine di destinazione.
+ * @param paddedImage L'immagine con padding.
+ * @param filter Il filtro da applicare.
+ */
 void MyFilter2D::correlazioneC1( Mat src, Mat& dst, Mat paddedImage, Mat filter ) {
 
     for ( int i = 0; i < src.rows; i++ )
@@ -59,6 +74,16 @@ void MyFilter2D::correlazioneC1( Mat src, Mat& dst, Mat paddedImage, Mat filter 
     dst.convertTo( dst, CV_8UC1 );
 }
 
+/**
+ * Applica la correlazione su un'immagine a colori o a canali multipli.
+ *
+ * @tparam T Il tipo di pixel dell'immagine.
+ * @param src L'immagine di origine.
+ * @param dst L'immagine di destinazione.
+ * @param paddedImage L'immagine con padding.
+ * @param filter Il filtro da applicare.
+ * @param channels Il numero di canali dell'immagine.
+ */
 template<typename T> void MyFilter2D::correlazioneC( Mat src, Mat& dst, Mat paddedImage, Mat filter, int channels ) {
 
    
