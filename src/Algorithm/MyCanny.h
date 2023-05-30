@@ -10,11 +10,21 @@ using namespace cv;
 class MyCanny {
     private:
         static void nonMaxSuppression( Mat&, const Mat&, Mat& );
-        static void thresholdingIsteresi( Mat&, bool, bool );
+        static void thresholdingIsteresi( Mat&, double, double );
     public:
-        static void myCanny( const Mat&, Mat&, double, double, int, bool );
+        static void myCanny( const Mat&, Mat&, double, double, int, bool, bool );
 };
 
+/**
+ * L'obiettivo della non-maximum suppression è quello di affinare i bordi dell'immagine,
+ * mantenendo solo i punti che rappresentano i bordi veri e propri.
+ * Questo viene fatto considerando l'orientamento del gradiente (fase) in ogni punto
+ * e confrontando la magnitudo con i suoi vicini lungo questa direzione.
+ * 
+ * @param magnitude immagine di input
+ * @param phase immagine di input
+ * @param edges immagine di output
+ */
 void MyCanny::nonMaxSuppression( Mat& magnitude, const Mat& phase, Mat& edges ) {
 
     // Inizializzazione
@@ -54,7 +64,20 @@ void MyCanny::nonMaxSuppression( Mat& magnitude, const Mat& phase, Mat& edges ) 
     }
 }
 
-void MyCanny::thresholdingIsteresi( Mat& edges, bool threshold1, bool threshold2 ) {
+
+/**
+ * La funzione thresholdingIsteresi esegue il thresholding con isteresi.
+ * Divide i bordi in tre categorie: forti, deboli e non bordi.
+ * Viene applicato un threshold inferiore (threshold1) per convertire i pixel con valori inferiori in pixel non bordo (0).
+ * Viene applicato anche un threshold superiore (threshold2) per convertire i pixel con valori superiori in pixel bordo forti (255).
+ * Sui pixel con valori compresi tra i due threshold viene eseguito un processo di connessione 
+ * dei pixel deboli ai pixel forti adiacenti per determinare se vengono accettati come bordi o meno.
+ * 
+ * @param edges immagine di input e output
+ * @param threshold1 parametro di sogliatura inferiore
+ * @param threshold2 parametro di sogliatura superiore
+*/
+void MyCanny::thresholdingIsteresi( Mat& edges, double threshold1, double threshold2 ) {
 
     for ( int i = 1; i < edges.rows - 1; i++ ) {
         for ( int j = 1; j < edges.cols - 1; j++ ) {
@@ -83,7 +106,43 @@ void MyCanny::thresholdingIsteresi( Mat& edges, bool threshold1, bool threshold2
     }
 }
 
-void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double threshold2, int apertureSize = 3, bool L2gradient = false ) {
+/**
+ * Canny è ampiamente utilizzato nel campo della visione artificiale
+ * e dell'elaborazione delle immagini per individuare i bordi nelle immagini
+ * 
+ * La funzione myCanny implementa l'intero algoritmo di Canny. Ecco i passaggi principali:
+ * 
+ * a. L'immagine di input viene convoluta con un filtro Gaussiano per ridurre il rumore nell'immagine.
+ * 
+ * b. Vengono calcolate le derivate parziali dell'immagine utilizzando l'operatore Sobel.
+ *    Queste derivate rappresentano il gradiente dell'immagine lungo le direzioni x e y.
+ * 
+ * c. Viene calcolata la magnitudo del gradiente combinando le derivate parziali utilizzando la funzione cv::magnitude.
+ *    La magnitudo rappresenta la forza del gradiente in ciascun punto dell'immagine.
+ * 
+ * d. Viene calcolata la fase del gradiente utilizzando la funzione cv::phase.
+ *    La fase fornisce informazioni sull'orientazione del gradiente in ciascun punto dell'immagine.
+ * 
+ * e. Viene applicata la fase di non-maximum suppression utilizzando la funzione nonMaxSuppression
+ *    per mantenere solo i punti che rappresentano i bordi veri e propri.
+ * 
+ * f. Viene eseguito il thresholding con isteresi utilizzando la funzione thresholdingIsteresi per ottenere i bordi finali.
+ * 
+ * g. Infine, l'immagine dei bordi viene restituita come risultato.
+ * 
+ * Questo è l'algoritmo di base per il rilevamento dei bordi utilizzando l'algoritmo di Canny.
+ * È possibile personalizzare i valori dei threshold e altri parametri
+ * 
+ * @param image immagine di input
+ * @param edges immagine di output
+ * @param threshold1 parametro di sogliatura inferiore
+ * @param threshold2 parametro di sogliatura superiore
+ * @param apertureSize apertura del kernel nell'applicazione di sobel
+ * @param L2gradient specifica il tipo di calcolo del gradiente
+ * @param showImageProcessing specifica se si vuole visualizzare le immagini in fase di elaborazione
+*/
+void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double threshold2, 
+                        int apertureSize = 3, bool L2gradient = false, bool showImageProcessing = 1 ) {
 
     // 1. Convolvere l'immagine di input con un filtro Gaussiano
     Mat paddedImage;
@@ -143,35 +202,21 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     nonMaxSuppression( magnitude, phase, edges );
 
     // Visualizzazione immagine in fase di elaborazione
-    imshow( "magnitude", magnitude );
-    imshow( "phase", phase );
-    imshow( "NonMaxSuppression", edges );
-
-    // 4. Applicare il thresholding con isteresi
-    // thresholdingIsteresi( edges, threshold1, threshold2 );
-    for ( int i = 1; i < edges.rows - 1; i++ ) {
-        for ( int j = 1; j < edges.cols - 1; j++ ) {
-
-            uchar pixel = edges.at<uchar>( i, j );
-
-            if ( pixel > threshold2 )
-                pixel = 255;
-            else if ( pixel <= threshold1 )
-                pixel = 0;
-            else {
-                bool strongNeighbor = false;
-                for ( int x = -1; x <= 1 && !strongNeighbor; x++ ) {
-                    for ( int y = -1; y <= 1 && !strongNeighbor; y++ ) {
-                        if ( edges.at<uchar>( i + x, j + y ) > threshold2 )
-                            strongNeighbor = true;
-                    }
-                }
-                if ( strongNeighbor )
-                    pixel = 255;
-                else
-                    pixel = 0;
-            }
-            edges.at<uchar>( i, j ) = pixel;
-        }
+    if ( showImageProcessing ) {
+        imshow( "magnitude", magnitude );
+        imshow( "phase", phase );
+        imshow( "NonMaxSuppression", edges );
     }
+
+    /**
+     * 4. Applicare il thresholding con isteresi
+     * 
+     * La funzione thresholdingIsteresi esegue il thresholding con isteresi.
+     * Questa fase dell'algoritmo divide i bordi in tre categorie: forti, deboli e non bordi.
+     * Viene applicato un threshold inferiore (threshold1) per convertire i pixel con valori inferiori in pixel non bordo (0).
+     * Viene applicato anche un threshold superiore (threshold2) per convertire i pixel con valori superiori in pixel bordo forti (255).
+     * Sui pixel con valori compresi tra i due threshold viene eseguito un processo di connessione 
+     * dei pixel deboli ai pixel forti adiacenti per determinare se vengono accettati come bordi o meno.
+    */
+    thresholdingIsteresi( edges, threshold1, threshold2 );
 }
