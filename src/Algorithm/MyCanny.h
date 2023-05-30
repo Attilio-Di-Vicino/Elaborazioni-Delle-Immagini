@@ -124,9 +124,6 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     Mat phase;
     cv::phase( dx, dy, phase, true );
 
-    imshow( "magnitude", magnitude );
-    imshow( "phase", phase );
-
     /**
      * 3. Applicare la non-maximum suppression
      *
