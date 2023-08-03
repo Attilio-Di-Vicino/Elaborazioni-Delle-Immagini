@@ -33,10 +33,10 @@ int main(int argc, char **argv)
     imshow("Display window", image);
     waitKey(0);
 
-    int min_value = 0;
-    int max_value = 255;
+    // int min_value = 0;
+    // int max_value = 255;
 
-    int random_number = min_value + (std::rand() % (max_value - min_value + 1));
+    // int random_number = min_value + (std::rand() % (max_value - min_value + 1));
 
     for (int i = 0; i < image.rows; i++)
         for (int j = 0; j < image.cols; j++)
