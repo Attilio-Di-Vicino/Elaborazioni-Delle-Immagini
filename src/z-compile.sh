@@ -2,7 +2,7 @@
 
 # Definizione della funzione di compilazione con OpenCV
 function cv_compile() {
-  g++ "$1" $(pkg-config --cflags --libs opencv) -o "$2"
+  g++ -Wall "$1" $(pkg-config --cflags --libs opencv) -o "$2"
 }
 
 # Verifica che sia stato specificato almeno un argomento
