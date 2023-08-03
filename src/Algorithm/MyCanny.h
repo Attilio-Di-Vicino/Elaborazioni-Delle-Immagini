@@ -56,7 +56,7 @@ void MyCanny::myCanny( const Mat& image, Mat& edges, double threshold1, double t
     // 1. Convolvere l'immagine di input con un filtro Gaussiano
     Mat paddedImage;
     Mat gaussianBlur;
-    // copyMakeBorder( image, paddedImage, 1, 1, 1, 1, BORDER_REFLECT );
+    copyMakeBorder( image, paddedImage, 2, 2, 2, 2, BORDER_REFLECT );
     GaussianBlur( paddedImage, gaussianBlur, Size( 5, 5 ), 0, 0 );
 
     // 2. Calcolare la magnitudo e l'orientazione del gradiente
