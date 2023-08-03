@@ -10,6 +10,7 @@ echo 'alias aci_patt="./a.out image/acircles_pattern.png"' >> ~/.bashrc
 echo 'alias apple="./a.out image/apple.jpg"' >> ~/.bashrc
 echo 'alias apple="./a.out image/apple.jpg"' >> ~/.bashrc
 echo 'alias lena="./a.out image/lena.jpg"' >> ~/.bashrc
+echo 'alias sta="./a.out image/staccionata.png"' >> ~/.bashrc
 echo 'alias logo="./a.out image/opencv-logo.png"' >> ~/.bashrc
 echo 'alias pattern="./a.out image/pattern.png"' >> ~/.bashrc
 
