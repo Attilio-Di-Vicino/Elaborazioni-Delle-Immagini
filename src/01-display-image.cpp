@@ -14,6 +14,8 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
+    cout << "OpenCV version: " << CV_VERSION << std::endl;
+    
     //! [load]
     String imageName( "HappyFish.jpg" ); // by default
     if( argc > 1 )
