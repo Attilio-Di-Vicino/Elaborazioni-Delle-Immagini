@@ -53,7 +53,7 @@ void votation( const Mat& edge, Mat& voteSpacing ) {
             // Se è un edge
             if ( edge.at<uchar>( y, x ) == 255 ) {
                 // Angoli possibili -90 a 90
-                for( int thetaIndex = 0; thetaIndex <= 180; thetaIndex++ ) {
+                for ( int thetaIndex = 0; thetaIndex <= 180; thetaIndex++ ) {
                     // Conversione in radianti dell'angolo corrente
                     theta = ( thetaIndex - 90 ) * DEG2RAD;
                     rho = cvRound( x * cos( theta ) + y * sin( theta ) ) + hypotenuse;
