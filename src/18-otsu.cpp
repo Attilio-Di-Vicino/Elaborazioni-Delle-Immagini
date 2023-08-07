@@ -58,8 +58,6 @@ int otsu( const Mat& src ) {
     cumulativeAverages.at(0) = normalizedHistogram.at(0);
     mg = normalizedHistogram.at(0);
     for ( auto i = 1; i < 256; i++ ) {
-
-        // 2, 3, 4.
         cumulativeSums.at(i) = cumulativeSums.at( i - 1 ) + normalizedHistogram.at(i);
         cumulativeAverages.at(i) = cumulativeAverages.at( i - 1 ) + i * normalizedHistogram.at(i);
         mg += i * normalizedHistogram.at(i);
