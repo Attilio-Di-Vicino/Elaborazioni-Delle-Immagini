@@ -1,3 +1,6 @@
+#ifndef MYBLUR_H
+#define MYBLUR_H
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -91,3 +94,5 @@ template<typename T> Mat MyBlur::moreChannels( Mat image, Mat paddedImage, int k
         }
     return image;
 }
+
+#endif // MYBLUR_H
