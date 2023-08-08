@@ -1,3 +1,6 @@
+#ifndef MYFILTER2D_H
+#define MYFILTER2D_H
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -112,3 +115,5 @@ template<typename T> void MyFilter2D::correlazioneC( Mat src, Mat& dst, Mat padd
         }
     dst.convertTo( dst, CV_8U );
 }
+
+#endif // MYFILTER2D_H
