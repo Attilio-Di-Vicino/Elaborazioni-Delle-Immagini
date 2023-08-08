@@ -37,7 +37,7 @@ vector<double> createNormalizedHistogram( const Mat& image ) {
     return normalizedHistogram;
 }
 
-vector<int> otsuM( const Mat& src ) {
+vector<int> otsu2k( const Mat& src ) {
     
     Mat gauss;
     GaussianBlur( src, gauss, Size( 3, 3 ), 0, 0 );
@@ -106,7 +106,7 @@ int main( int argc, char* argv[] ) {
     Mat myOtsu;
     src.copyTo( myOtsu );
 
-    vector<int> T = otsuM( src );
+    vector<int> T = otsu2k( src );
     cout << "T: " << T.at(0) << " T: " << T.at(1) << endl;
     
     // Applica la soglia alle diverse regioni dell'immagine
