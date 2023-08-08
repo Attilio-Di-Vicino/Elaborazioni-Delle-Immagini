@@ -1,3 +1,6 @@
+#ifndef MYPADDING_H
+#define MYPADDING_H
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -207,3 +210,5 @@ template <typename T> void MyPadding<T>::borderReflect( Mat src, Mat& dst, int t
 template <typename T> void MyPadding<T>::borderReflect101( Mat src, Mat& dst, int top, int bottom, int left, int right, const Scalar value ) {
     // DA IMPLEMENTARE
 }
+
+#endif // MYPADDING_H
