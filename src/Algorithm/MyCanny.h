@@ -1,3 +1,6 @@
+#ifndef MYCANNY_H
+#define MYCANNY_H
+
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <stdlib.h>
@@ -220,3 +223,5 @@ void MyCanny::thresholdingIsteresi( Mat& edges, double threshold1, double thresh
         }
     }
 }
+
+#endif // MYCANNY_H
