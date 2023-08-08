@@ -24,8 +24,7 @@ template <typename T> class MyPadding {
                                         int top, int bottom, int left, int right, 
                                         const Scalar value );
 
-        static void borderWrap(         
-                                        Mat src, Mat& dst, 
+        static void borderWrap(         Mat src, Mat& dst, 
                                         int top, int bottom, int left, int right, 
                                         const Scalar value );
 
