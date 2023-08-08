@@ -47,20 +47,22 @@ vector<int> otsuM( const Mat& src ) {
     vector<double> cumulativeAverages( 3, 0.0f ); // Medie cumulative
     double mg = 0.0f; // Intensità globale media
     double interclassVariance = 0.0f; // Varianza interclasse
+    double iv = 0.0f;
     vector<int> T( 2, 0 ); // Soglia ottimale
 
     // 1. Calcolare l'istogramma normalizzato dell'immagine
     normalizedHistogram = createNormalizedHistogram( gauss );
 
-    // 
+    // Init
     cumulativeSums.at(0) = normalizedHistogram.at(0);
     cumulativeAverages.at(0) = normalizedHistogram.at(0);
     mg = normalizedHistogram.at(0);
 
+    // 4. Calcolare l'intensità globale media mg
     for ( auto i = 1; i < 256; i++ )
         mg += i * normalizedHistogram.at(i);
 
-    // 
+    // 2, 3, 5, 6.
     for ( auto i = 1; i < 256 - 2; i++ ) {
         cumulativeSums.at(0) += normalizedHistogram.at(i);
         cumulativeAverages.at(0) += i * normalizedHistogram.at(i);
@@ -73,16 +75,16 @@ vector<int> otsuM( const Mat& src ) {
                 cumulativeSums.at(2) += normalizedHistogram.at(k);
                 cumulativeAverages.at(2) += k * normalizedHistogram.at(k);
 
-                float sigma = 0.0f;
-                for( int z = 0; z < 3; z++ )
-                    sigma += cumulativeSums.at(z) * 
+                for ( int z = 0; z < 3; z++ )
+                    iv += cumulativeSums.at(z) * 
                             pow( ( cumulativeAverages.at(z) / cumulativeSums.at(z) - mg ), 2 ); 
 
-                if( sigma > interclassVariance ) {
-                    interclassVariance = sigma;
-                    T.at(0) = i;
-                    T.at(1) = j;
+                if ( iv > interclassVariance ) {
+                    interclassVariance = iv;
+                    T.at(0) = i; // Low
+                    T.at(1) = j; // Hight
                 }
+                iv = 0.0f;
             }
             cumulativeSums.at(2) = cumulativeAverages.at(2) = 0.0f;
         }
@@ -105,7 +107,7 @@ int main( int argc, char* argv[] ) {
     src.copyTo( myOtsu );
 
     vector<int> T = otsuM( src );
-    // cout << "T: " << T.at(0) << " T: " << T.at(1) << endl;
+    cout << "T: " << T.at(0) << " T: " << T.at(1) << endl;
     
     // Applica la soglia alle diverse regioni dell'immagine
     for ( auto i = 0; i < myOtsu.rows; i++ )
