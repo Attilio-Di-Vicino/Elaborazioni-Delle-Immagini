@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include "Algorithm/MyThreshold.h"
 
 using namespace std;
 using namespace cv;
@@ -110,15 +111,16 @@ int main( int argc, char* argv[] ) {
     cout << "T: " << T.at(0) << " T: " << T.at(1) << endl;
     
     // Applica la soglia alle diverse regioni dell'immagine
-    for ( auto i = 0; i < myOtsu.rows; i++ )
-        for ( auto j = 0; j < myOtsu.cols; j++ ) {
-            if ( myOtsu.at<uchar>( i, j ) <= T.at(0) )
-                myOtsu.at<uchar>( i, j ) = 0;
-            else if ( myOtsu.at<uchar>( i, j ) < T.at(1) )
-                myOtsu.at<uchar>( i, j ) = 127;
-            else 
-                myOtsu.at<uchar>( i, j ) = 255;
-        }
+    // for ( auto i = 0; i < myOtsu.rows; i++ )
+    //     for ( auto j = 0; j < myOtsu.cols; j++ ) {
+    //         if ( myOtsu.at<uchar>( i, j ) <= T.at(0) )
+    //             myOtsu.at<uchar>( i, j ) = 0;
+    //         else if ( myOtsu.at<uchar>( i, j ) < T.at(1) )
+    //             myOtsu.at<uchar>( i, j ) = 127;
+    //         else 
+    //             myOtsu.at<uchar>( i, j ) = 255;
+    //     }
+    MyThreshold::threshold( src, myOtsu, T.at(0), T.at(1), 255, ( int ) MyType::THRESH_OTSU2K );
 
     imshow( "src", src );
     imshow( "myOtsu", myOtsu );
