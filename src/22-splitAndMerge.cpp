@@ -250,14 +250,14 @@ void drawMerged( TNode* root, Mat& img ) {
 
 int main( int argc, char** argv ) {
 
-    if ( argc != 4 ) {
-        cout << "\nusage: " << argv[0] << " <#smthreshold> <#tsize> " << endl;
+    if ( argc != 2 ) {
+        cout << "\nusage: " << argv[0] << " <name_image>" << endl;
         exit( EXIT_FAILURE );
     }
 
     Mat src = imread( argv[1], IMREAD_GRAYSCALE );
-    smthreshold = stod( argv[2] );
-    tsize = stoi( argv[3] );
+    smthreshold = 6;
+    tsize = 6;
 
     GaussianBlur( src, src, Size( 5, 5 ), 0, 0 ); // Evito rumore
 
