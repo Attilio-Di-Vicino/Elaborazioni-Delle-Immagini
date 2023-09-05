@@ -157,8 +157,8 @@ void MyCanny::nonMaxSuppression( Mat& magnitude, const Mat& phase, Mat& edges ) 
             uchar mag = magnitude.at<uchar>( i, j );
 
             // Horizontal edge 0 gradi
-            if ( ( angle <= -157.5 && angle > 157.5 ) || ( angle > -22.5 && angle <= 22.5 ) ) { 
-				q = magnitude.at<uchar>( i, j-1 );
+            if ( ( angle <= -157.5 && angle > 157.5 ) || ( angle > -22.5 && angle <= 22.5) ) { 
+				q = magnitude.at<uchar>( i, j-1 ); 
                 r = magnitude.at<uchar>( i, j+1 );
 			// -45 gradi
             } else if ( ( angle <= -112.5 && angle > -157.5 ) || ( angle > 22.5 && angle <= 67.5 ) ) {
