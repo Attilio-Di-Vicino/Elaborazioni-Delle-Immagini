@@ -56,7 +56,7 @@ double adjustClusterCenters(const Mat& img,vector<Scalar>& clusterCenters,vector
         double newBlue = 0.0f;
         double newGreen = 0.0f;
         double newRed = 0.0f;
-        for(auto pixel = 0; pixel < clusterIGroup.size(); pixel++){
+        for(size_t pixel = 0; pixel < clusterIGroup.size(); pixel++){
             Scalar pixelVal = img.at<Vec3b>(clusterIGroup.at(pixel));
             newBlue += pixelVal[0];
             newGreen += pixelVal[1];
