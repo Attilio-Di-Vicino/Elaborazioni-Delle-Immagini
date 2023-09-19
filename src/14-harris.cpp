@@ -74,6 +74,7 @@ void myCornerHarris( const Mat& src, Mat& dst, int blockSize, int ksize, double 
 
     // 6. Normalizzare l'indice R in [0, 255]
     normalize( R, dst, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+    imshow("dst2",dst);
 
     // 7. Sogliare R
     // threshold( dst, dst, thresh, 255, THRESH_BINARY );
