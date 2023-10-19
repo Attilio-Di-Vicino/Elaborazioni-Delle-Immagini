@@ -23,15 +23,44 @@ const int thresh = 200;
 const uchar maxRegionNum = 100;
 const double minRegionAreaFactor = 0.01;
 const cv::Point PointShift2D[8] = {
-    cv::Point(  1,  0 ),
-    cv::Point(  1, -1 ),
-    cv::Point(  0, -1 ),
     cv::Point( -1, -1 ),
     cv::Point( -1,  0 ),
     cv::Point( -1,  1 ),
+    cv::Point(  0, -1 ),
     cv::Point(  0,  1 ),
+    cv::Point(  1, -1 ),
+    cv::Point(  1,  0 ),
     cv::Point(  1,  1 )
 };
+
+void grow( const Mat& src, const Mat& dest, Mat& mask, Point seed ) {
+    
+    stack<Point> front;
+    front.push( seed );
+
+    while( !front.empty() ) {
+
+        Point center = front.top(); // Head
+        mask.at<uchar>( center ) = 1; // seme visitato
+        front.pop();
+
+        for( auto i = 0; i < 8; i++ ) { // 8 intorno
+            
+            Point neigh = center + PointShift2D[i]; // Mi basta un addizione per l'intorno in questione
+            if ( neigh.x < 0 || neigh.x >= src.cols || neigh.y < 0 || neigh.y >= src.rows )
+                continue;
+            else {
+                // Viene calcolata la differenza dei quadrati tra i valori dei canali ( Predicato )
+                int delta = cvRound( pow( src.at<Vec3b>( center )[0] - src.at<Vec3b>( neigh )[0], 2 ) +
+                                     pow( src.at<Vec3b>( center )[1] - src.at<Vec3b>( neigh )[1], 2 ) +
+                                     pow( src.at<Vec3b>( center )[2] - src.at<Vec3b>( neigh )[2], 2 ) );
+
+                if ( delta < thresh && !dest.at<uchar>( neigh ) && !mask.at<uchar>( neigh ) )
+                    front.push( neigh );
+            }  
+        }
+    }
+}
 
 void regionGrowing( const cv::Mat src, cv::Mat& dest ) {
 
@@ -61,35 +90,6 @@ void regionGrowing( const cv::Mat src, cv::Mat& dest ) {
 
                 mask = mask - mask;
             }
-}
-
-void grow( const Mat& src, const Mat& dest, Mat& mask, Point seed ) {
-    
-    stack<Point> front;
-    front.push( seed );
-
-    while( !front.empty() ) {
-
-        Point center = front.top(); // Head
-        mask.at<uchar>( center ) = 1; // seme visitato
-        front.pop();
-
-        for( auto i = 0; i < 8; i++ ) { // 8 intorno
-            
-            Point neigh = center + PointShift2D[i]; // Mi basta un addizione per l'intorno in questione
-            if ( neigh.x < 0 || neigh.x >= src.cols || neigh.y < 0 || neigh.y >= src.rows )
-                continue;
-            else {
-                // Viene calcolata la differenza dei quadrati tra i valori dei canali ( Predicato )
-                int delta = cvRound( pow( src.at<Vec3b>( center )[0] - src.at<Vec3b>( neigh )[0], 2 ) +
-                                     pow( src.at<Vec3b>( center )[1] - src.at<Vec3b>( neigh )[1], 2 ) +
-                                     pow( src.at<Vec3b>( center )[2] - src.at<Vec3b>( neigh )[2], 2 ) );
-
-                if ( delta < thresh && !dest.at<uchar>( neigh ) && !mask.at<uchar>( neigh ) )
-                    front.push( neigh );
-            }  
-        }
-    }
 }
 
 int main( int argc, char** argv ) {

@@ -74,8 +74,8 @@ void myHoughCircles( Mat image, Mat& circles, int method, double dp, double minD
         for ( int b = 0; b < image.rows; b++ )
             for ( int a = 0; a < image.cols; a++ )
                 if ( votes.at<uchar>( b, a, r - minRadius ) > param2 ) {
-                    circle( circles, Point( a, b ), 1, Scalar( 255, 0, 255 ), 3, LINE_AA );
-                    circle( circles, Point( a, b ), r, Scalar( 255, 0, 255 ), 3, LINE_AA );
+                    circle( circles, Point( a, b ), 1, Scalar( 255, 0, 255 ), 2, LINE_AA );
+                    circle( circles, Point( a, b ), r, Scalar( 255, 0, 255 ), 2, LINE_AA );
                 }
 }
 
@@ -113,7 +113,7 @@ int main( int argc, char* argv[] ) {
         circle( houghCircles, center, radius, Scalar(255,0,255), 3, LINE_AA);
     }
 
-    myHoughCircles( src, myHoughCirclesImg, HOUGH_GRADIENT, 0, 0, 0, 160, 1, 30 );
+    myHoughCircles( src, myHoughCirclesImg, HOUGH_GRADIENT, 0, 0, 0, 120, 22, 25 );
 
     imshow( "src", src );
     imshow( "houghCircles", houghCircles );

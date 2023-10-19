@@ -64,7 +64,15 @@ void votation( const Mat& edge, Mat& voteSpacing ) {
     }
 }
 
-void polarToCartesian( double rho, int theta, Point& begin, Point& end ) {
+/**
+ * Conversione cordinate polari to cartesian
+ * 
+ * @param rho rho
+ * @param theta theta
+ * @param begin begin 
+ * @param end end
+*/
+void polarToCartesian( const int rho, const float theta, Point& begin, Point& end ) {
 
     int x0 = cvRound( rho * cos( theta ) );
 	int y0 = cvRound( rho * sin( theta ) );
@@ -76,6 +84,13 @@ void polarToCartesian( double rho, int theta, Point& begin, Point& end ) {
 	end.y = cvRound( y0 + ALPHA * ( cos( theta )));
 }
 
+/**
+ * threshold in base ai voti 
+ * 
+ * @param lines oggetto Mat finale
+ * @param voteSpacing spazio dei voti
+ * @param threshold soglia
+*/
 void detectLines( Mat& lines, const Mat& voteSpacing, int threshold ) {
 
     Point begin, end;
@@ -86,14 +101,7 @@ void detectLines( Mat& lines, const Mat& voteSpacing, int threshold ) {
             if( voteSpacing.at<float>( rhoIndex, thetaIndex ) > threshold ) {
                 int rho = rhoIndex - hypotenuse;
                 float theta = ( thetaIndex - 90 ) * DEG2RAD;
-                int x0 = cvRound( rho * cos( theta ) );
-                int y0 = cvRound( rho * sin( theta ) );
-
-                begin.x = cvRound( x0 - ALPHA * ( -sin( theta )));
-                begin.y = cvRound( y0 - ALPHA * ( cos( theta )));
-
-                end.x = cvRound( x0 + ALPHA * ( -sin( theta )));
-                end.y = cvRound( y0 + ALPHA * ( cos( theta )));
+                polarToCartesian( rho, theta, begin, end );
                 line( lines, begin, end, Scalar( 255 ), 2, LINE_AA );
             }
         }

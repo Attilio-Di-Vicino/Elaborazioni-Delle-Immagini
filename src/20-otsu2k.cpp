@@ -68,7 +68,7 @@ vector<int> otsu2k( const Mat& src ) {
         cumulativeSums.at(0) += normalizedHistogram.at(i);
         cumulativeAverages.at(0) += i * normalizedHistogram.at(i);
 
-        for ( int j = i + 1; j < 255; j++ ) {
+        for ( int j = i + 1; j < 256; j++ ) {
             cumulativeSums.at(1) += normalizedHistogram.at(j);
             cumulativeAverages.at(1) += j * normalizedHistogram.at(j);
 
@@ -111,15 +111,6 @@ int main( int argc, char* argv[] ) {
     cout << "T: " << T.at(0) << " T: " << T.at(1) << endl;
     
     // Applica la soglia alle diverse regioni dell'immagine
-    // for ( auto i = 0; i < myOtsu.rows; i++ )
-    //     for ( auto j = 0; j < myOtsu.cols; j++ ) {
-    //         if ( myOtsu.at<uchar>( i, j ) <= T.at(0) )
-    //             myOtsu.at<uchar>( i, j ) = 0;
-    //         else if ( myOtsu.at<uchar>( i, j ) < T.at(1) )
-    //             myOtsu.at<uchar>( i, j ) = 127;
-    //         else 
-    //             myOtsu.at<uchar>( i, j ) = 255;
-    //     }
     MyThreshold::threshold( src, myOtsu, T.at(0), T.at(1), 255, ( int ) MyType::THRESH_OTSU2K );
 
     imshow( "src", src );

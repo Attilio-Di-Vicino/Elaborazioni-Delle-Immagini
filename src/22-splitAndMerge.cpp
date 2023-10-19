@@ -33,7 +33,8 @@ class TNode {
         TNode *UL, *UR, *LL, *LR; // 4 figli
         vector<TNode*> merged; // Regioni unite
         vector<bool> mergedB = vector<bool>( 4, false ); // Quali regioni possono essere unite
-        double stddev, mean;
+        Scalar mean = Scalar( 0, 0, 0 );
+        double stddev = 0.0f;
     public:
         TNode( Rect R ){ region = R; UL = UR = LL = LR = nullptr; };
         
@@ -48,10 +49,10 @@ class TNode {
         void setLR( TNode* N ){ LR = N; };
         
         double getStdDev(){ return stddev; };
-        double getMean(){ return mean; };
+        Scalar getMean(){ return mean; };
         
         void setStdDev( double stddev ){ this->stddev = stddev; };
-        void setMean( double mean ){ this->mean = mean; };
+        void setMean( Scalar mean ){ this->mean = mean; };
 
         void addRegion( TNode* R ){ merged.push_back(R); };
         vector<TNode*>& getMerged(){ return merged; };
@@ -71,8 +72,8 @@ TNode* split( Mat& img, Rect R ) {
     meanStdDev( img(R), mean, stddev );
 
     // Set stddev e mena della radice del sotto albero radicato ( inizialmente tutta l'immagine )
-    root->setMean( mean[0] );
-    root->setStdDev( stddev[0] );
+    root->setMean( mean );
+    root->setStdDev( sqrt( pow( stddev[0] + stddev[1] + stddev[2], 2 ) ) );
 
     // Se la dimensione della regione è maggiore di quella minima
     // E se la dev std è minore di th ( La dispersione dei valori di grigio è maggiore di un threshold )
@@ -189,15 +190,17 @@ void segment( TNode* root, Mat& img ) {
         segment( root->getLR(), img );
         segment( root->getLL(), img );
     } else {
-        double val = 0;
+        Scalar val = Scalar( 0, 0, 0 );
         
         for ( auto x: tmp )
-            val += ( int ) x->getMean();
+            val += x->getMean();
         
-        val /= tmp.size();
+        val[0] /= tmp.size();
+        val[1] /= tmp.size();
+        val[2] /= tmp.size();
 
         for ( auto x: tmp )
-            img( x->getRegion() ) = ( int ) val;
+            img( x->getRegion() ) = val;
 
         if ( tmp.size() > 1 ) {
             
@@ -255,8 +258,8 @@ int main( int argc, char** argv ) {
         exit( EXIT_FAILURE );
     }
 
-    Mat src = imread( argv[1], IMREAD_GRAYSCALE );
-    smthreshold = 6;
+    Mat src = imread( argv[1], IMREAD_COLOR );
+    smthreshold = 40;
     tsize = 6;
 
     GaussianBlur( src, src, Size( 5, 5 ), 0, 0 ); // Evito rumore
@@ -266,17 +269,19 @@ int main( int argc, char** argv ) {
     int s = pow( 2.0, ( double ) exponent );
     Rect square = Rect( 0, 0, s, s );
     src = src( square ).clone();
+    Mat srcSplit = src.clone();
     Mat srcMer = src.clone();
     Mat srcSeg = src.clone();
 
-    TNode* root = split( src, Rect( 0, 0, src.rows, src.cols ) );
+    TNode* root = split( srcSplit, Rect( 0, 0, src.rows, src.cols ) );
     merge( root );
     drawMerged( root, srcMer );
     segment( root, srcSeg );
 
-    imshow( "Quad Tree", src );
-    imshow( "Merged", srcMer );
-    imshow( "Segmented", srcSeg );
+    imshow( "src", src );
+    imshow( "Split", srcSplit );
+    imshow( "Merge", srcMer );
+    imshow( "Segment", srcSeg );
     waitKey(0);
 
     return 0;
