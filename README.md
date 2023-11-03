@@ -2,11 +2,13 @@
 
 Questo progetto consiste in una serie di elaborazioni delle immagini implementate in C++ utilizzando la libreria OpenCV. Le elaborazioni attualmente implementate includono:
 
-- **Rilevamento dei bordi**: utilizzando algoritmi come Canny e Harris per individuare i bordi presenti nell'immagine.
-- **Segmentazione dell'immagine tramite clustering**: applicazione di algoritmi di clustering come k-means e mean-shift per raggruppare i pixel dell'immagine in segmenti omogenei.
+- **Rilevamento dei bordi**: utilizzando algoritmi come Canny per individuare i bordi presenti nell'immagine.
+- **Rilevamento dei corner**: utilizzando algoritmi come Harris per individuare i corner presenti nell'immagine.
 - **Trasformazione di Hough per il rilevamento di linee e cerchi**: utilizzo della trasformazione di Hough per identificare linee rette e cerchi presenti nell'immagine.
-- **Algoritmi classici**: implementazione di algoritmi classici di elaborazione delle immagini, come split and merge per la segmentazione gerarchica dell'immagine.
+- **Sogliatura**: Calcolo di soglie ottimali per la segmentazione utilizzando il metodo di Otsu singola soglia e multi soglia
 - **Altri algoritmi di segmentazione**: inclusione di tecniche come region growing per la segmentazione dell'immagine in base a criteri di omogeneità.
+- **Algoritmi classici**: implementazione di algoritmi classici di elaborazione delle immagini, come split and merge per la segmentazione gerarchica dell'immagine.
+- **Segmentazione dell'immagine tramite clustering**: applicazione di algoritmi di clustering come k-means e mean-shift per raggruppare i pixel dell'immagine in segmenti omogenei.
 
 Queste funzionalità offrono diverse possibilità di analisi e manipolazione delle immagini, consentendo di ottenere risultati interessanti e utili per varie applicazioni.
 
